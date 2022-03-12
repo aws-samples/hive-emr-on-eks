@@ -1,0 +1,43 @@
+replicaCount: 1
+image:
+  name: ghcr.io/aws-samples/hive-metastore
+  tag: 3.0.0
+  pullPolicy: IfNotPresent
+
+serviceAccountName: hive
+env:
+# enable s3a support
+  HIVE_WAREHOUSE_S3LOCATION: {{S3BUCKET}}
+# setup metastoreDB  
+  HIVE_DB_EXTERNAL: "true"
+  HIVE_DB_DRIVER: com.mysql.cj.jdbc.Driver
+  HIVE_CONF_PARAMS: "hive.metastore.schema.verification:false;hive.metastore.event.db.notification.api.auth:false;hadoop.proxyuser.hive.hosts:HS2_HOST;hadoop.proxyuser.hive.groups:*;datanucleus.schema.autoCreateAll:true;datanucleus.schema.autoCreateTables:true;datanucleus.autoStartMechanism:SchemaTable;datanucleus.fixedDatastore:true"
+  HIVE_DB_JDBC_URL: {{RDS_JDBC_URL}}
+# sensitive variables mounted from EKS secret using secretKeyRef keyword in the form of
+  # - name: RDS_PASSWORD
+  #   valueFrom:
+  #       secretKeyRef:
+  #         name: rds-hms-secret
+  #         key: password   
+secretName: rds-hms-secret
+secret:
+  HIVE_DB_USER: username
+  HIVE_DB_PASS: password
+    
+service:
+  type: ClusterIP
+
+resources:
+  limits:
+    cpu: 1
+    memory: 1000Mi
+  requests:
+    cpu: 400m
+    memory: 1000Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
