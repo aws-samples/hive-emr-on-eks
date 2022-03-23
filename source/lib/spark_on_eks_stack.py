@@ -63,7 +63,7 @@ class SparkOnEksStack(core.Stack):
 
         _hms_chart = self._eks_cluster.my_cluster.add_helm_chart('HMSChart',
             chart='hive-metastore',
-            repository='https://aws-samples.github.io/hive-metastore-chart',
+            repository='https://melodyyangaws.github.io/hive-metastore-chart',
             release='hive',
             version='1.2.0',
             create_namespace=False,

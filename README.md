@@ -61,7 +61,7 @@ Additional tools for CDK deployment approach:
 * To launch in a different AWS Region, check out the following customization section, or use the CDK deployment option.
 
 ### Customization
-You can customize the solution, for examle remove the EMR on EC2 cluster setup, then generate the CFN tmeplates in your region: 
+You can customize the solution, for examle remove the EMR on EC2 cluster setup or set to a different deployment region, then generate the CFN templates in the required region: 
 ```bash
 export BUCKET_NAME_PREFIX=<my-bucket-name> # bucket where customized code will reside
 export AWS_REGION=<your-region>
@@ -81,11 +81,11 @@ echo -e "\nIn web browser, paste the URL to launch the template: https://console
 ```
 
 ### CDK Deployment
-Alternatively, deploy the infrastructure via CDK. It requires to pre-install the following tools:
+Alternatively, deploy the infrastructure via CDK. It requires to pre-install the following tools as once-off tasks:
 1. [Python 3.6+](https://cdkworkshop.com/15-prerequisites/600-python.html)
 2. [Nodejs 10.3.0+](https://nodejs.org/en/)
 3. [CDK toolkit](https://cdkworkshop.com/15-prerequisites/500-toolkit.html)
-4. [CDK bootstrap](https://cdkworkshop.com/20-typescript/20-create-project/500-deploy.html)
+4. Run the [CDK bootstrap](https://cdkworkshop.com/20-typescript/20-create-project/500-deploy.html) after the 'pip install' requirement step as below. 
 
 ```bash
 python3 -m venv .env

@@ -37,6 +37,7 @@ RUN curl -s -o tools/lib/mysql-connector-java.jar https://repo1.maven.org/maven2
     curl -s -o tools/lib/log4j-core-2.17.2.jar https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.17.2/log4j-core-2.17.2.jar && \
     curl -s -o tools/lib/log4j-slf4j18-impl-2.17.2.jar https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-slf4j18-impl/2.17.2/log4j-slf4j18-impl-2.17.2.jar  && \
     curl -s -o aws-java-sdk-bundle-${aws_java_sdk_version}.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${aws_java_sdk_version}/aws-java-sdk-bundle-${aws_java_sdk_version}.jar && \
+    curl -s -o aws-java-sdk-sts-${aws_java_sdk_version}.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-sts/1.12.75/aws-java-sdk-sts-${aws_java_sdk_version}.jar && \
     rm tools/lib/aws-java-sdk* && \
     mv aws-java-sdk-bundle-${aws_java_sdk_version}.jar tools/lib/ && \
     ln -s tools/lib/hadoop-aws* common/lib/ && \
