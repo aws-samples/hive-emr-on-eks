@@ -27,9 +27,9 @@ The infrastructure deployment includes the following:
 * [6. Hudi with Glue catalog](#44-hudi--glue-catalog-integration)
 
 # Key Artifacts
-- Job source code - [deployment/app_code/job](deployment/app_code/job).
-- HMS sidecar pod template - [deployment/app_code/job/sidecar_hms_pod_template.yaml](deployment/app_code/job/sidecar_hms_pod_template.yaml).
-- Standalone hive-metastore docker image - Follow the [README instruction](./docker) to build your own. Don't forget to update your sidecar pod template or helm chart value file with your own ECR URL.
+- **Job source code** - [deployment/app_code/job](deployment/app_code/job).
+- **HMS sidecar pod** template - [deployment/app_code/job/sidecar_hms_pod_template.yaml](deployment/app_code/job/sidecar_hms_pod_template.yaml).
+- **Standalone hive-metastore docker image** - Follow the [README instruction](./docker) to build your own. Don't forget to update your sidecar pod template or helm chart value file with your own ECR URL.
 
 ## Deploy Infrastructure
 
@@ -43,7 +43,7 @@ Install the folowing tools:
 1. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html). Configure the CLI by `aws configure`.
 2. [kubectl & jq](https://www.eksworkshop.com/020_prerequisites/k8stools/)
 
-Can consider [AWS CloudShell](https://console.aws.amazon.com/cloudshell) that has included all the neccessary software for a quick start.
+Can use [AWS CloudShell](https://console.aws.amazon.com/cloudshell) that has included all the neccessary software for a quick start.
 
 Additional tools for CDK deployment approach:
 1. [Python 3.6 +](https://www.python.org/downloads/)
