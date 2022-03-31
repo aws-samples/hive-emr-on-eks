@@ -29,7 +29,7 @@ The infrastructure deployment includes the following:
 # Key Artifacts
 - Job source code - [deployment/app_code/job](deployment/app_code/job).
 - HMS sidecar pod template - [deployment/app_code/job/sidecar_hms_pod_template.yaml](deployment/app_code/job/sidecar_hms_pod_template.yaml).
-- Standalone hive-metastore docker image - [ghcr.io/aws-samples/hive-metastore:3.0.0](https://github.com/aws-samples/hive-emr-on-eks/pkgs/container/hive-metastore). Follow the [README instruction](./docker) to build your own if needed. The best practice is to upload the image to your private container repository, eg.ECR. Don't forget to update your sidecar pod template or helm chart value file with the new ECR URL.
+- Standalone hive-metastore docker image - Follow the [README instruction](./docker) to build your own. Don't forget to update your sidecar pod template or helm chart value file with your own ECR URL.
 
 ## Deploy Infrastructure
 
