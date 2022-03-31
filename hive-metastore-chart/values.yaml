@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  name: ghcr.io/aws-samples/hive-metastore
+  name: ghcr.io/melodyyangaws/hive-metastore
   tag: 3.0.0
   pullPolicy: IfNotPresent
 serviceAccountName: hive

@@ -61,7 +61,7 @@ Additional tools for CDK deployment approach:
 * To launch in a different AWS Region, check out the following customization section, or use the CDK deployment option.
 
 ### Customization
-You can customize the solution, for examle remove the EMR on EC2 cluster setup or set to a different deployment region, then generate the CFN templates in the required region: 
+You can customize the solution, for examle remove the EMR on EC2 cluster setup or set to a different deployment region: 
 ```bash
 export BUCKET_NAME_PREFIX=<my-bucket-name> # bucket where customized code will reside
 export AWS_REGION=<your-region>
@@ -77,7 +77,7 @@ aws s3 mb s3://$BUCKET_NAME_PREFIX-$AWS_REGION --region $AWS_REGION
 aws s3 cp ./deployment/global-s3-assets/ s3://$BUCKET_NAME_PREFIX-$AWS_REGION/$SOLUTION_NAME/$VERSION/ --recursive --acl bucket-owner-full-control
 aws s3 cp ./deployment/regional-s3-assets/ s3://$BUCKET_NAME_PREFIX-$AWS_REGION/$SOLUTION_NAME/$VERSION/ --recursive --acl bucket-owner-full-control
 
-echo -e "\nIn web browser, paste the URL to launch the template: https://console.aws.amazon.com/cloudformation/home?region=$AWS_REGION#/stacks/quickcreate?stackName=HiveEMRonEKS&templateURL=https://$BUCKET_NAME_PREFIX-$AWS_REGION.s3.amazonaws.com/$SOLUTION_NAME/$VERSION/HiveEMRonEKS.template\n"
+echo -e "\nIn web browser, paste the URL to launch the CFN template: https://console.aws.amazon.com/cloudformation/home?region=$AWS_REGION#/stacks/quickcreate?stackName=HiveEMRonEKS&templateURL=https://$BUCKET_NAME_PREFIX-$AWS_REGION.s3.amazonaws.com/$SOLUTION_NAME/$VERSION/HiveEMRonEKS.template\n"
 ```
 
 ### CDK Deployment
@@ -106,7 +106,15 @@ source ~/.bash_profile
 ```
 If you don’t want to install anything on your computer or change your .bash_profile, use [Cloud9](https://console.aws.amazon.com/cloud9/home) or [Cloudshell](https://console.aws.amazon.com/cloudshell/home), browser-based IDE or shell to run commands.
 
-2. Upload sample data:
+2. Build your docker image and update the hive metastore [helm chart image](hive-metastore-chart/values.yaml) by your docker image:
+```bash
+cd docker
+export DOCKERHUB_USERNAME=<your_dockerhub_name_OR_ECR_URL>
+docker build -t $DOCKERHUB_USERNAME/hive-metastore:3.0.0_hadoop_3.2.1 --build-arg HADOOP_VERSION=3.2.1 --build-arg HMS_VERSION=3.0.0 .
+docker push $DOCKERHUB_USERNAME/hive-metastore:3.0.0_hadoop_3.2.1
+```
+
+3. Copy sample data to your S3 bucket:
 ```bash
 aws s3 cp s3://amazon-reviews-pds/parquet/product_category=Toys/ s3://$S3BUCKET/app_code/data/toy --recursive
 ```
