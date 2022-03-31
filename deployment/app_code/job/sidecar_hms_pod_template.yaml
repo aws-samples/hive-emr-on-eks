@@ -8,7 +8,7 @@ metadata:
 spec:
   containers:
   - name: hms
-    image: ghcr.io/aws-samples/hive-metastore:3.0.0
+    image: ghcr.io/melodyyangaws/hive-metastore:3.0.0
     resources:
       limits:
         cpu: "1"
@@ -23,11 +23,9 @@ spec:
           command: ["sh", "-c", ""]
     env:
     - name: HIVE_DB_DRIVER
-      value: org.mariadb.jdbc.Driver
+      value: com.mysql.cj.jdbc.Driver
     - name: HIVE_DB_EXTERNAL
       value: "true"
-    - name: HIVE_DB_DRIVER
-      value: org.mariadb.jdbc.Driver
     # hard code Hive metastore RDS credentials  
     # - name: HIVE_DB_USER
     #   value: admin 

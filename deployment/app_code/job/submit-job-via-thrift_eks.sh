@@ -4,7 +4,7 @@ aws emr-containers start-job-run \
 --virtual-cluster-id $VIRTUAL_CLUSTER_ID \
 --name spark-hive-via-thrift-EKS \
 --execution-role-arn $EMR_ROLE_ARN \
---release-label emr-6.2.0-latest \
+--release-label emr-6.5.0-latest \
 --job-driver '{
   "sparkSubmitJobDriver": {
       "entryPoint": "s3://'$S3BUCKET'/app_code/job/hivethrift_eks.py",

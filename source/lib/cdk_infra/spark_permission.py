@@ -120,6 +120,7 @@ class AppSecConst(core.Construct):
             )
         )
 
+
         # Associate AWS IAM role to K8s Service Account
         ###################################################
         #######                                     #######
@@ -133,7 +134,7 @@ class AppSecConst(core.Construct):
         )
         for statmnt in _emr_iam:
             self._emr_exec_role.add_to_policy(iam.PolicyStatement.from_json(statmnt))
-            _hive_sa.add_to_principal_policy(iam.PolicyStatement.from_json(statmnt))
+            _hive_sa.add_to_policy.add_to_principal_policy(iam.PolicyStatement.from_json(statmnt))
 
         ############################################
         #######                              #######

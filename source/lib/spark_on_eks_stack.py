@@ -89,13 +89,3 @@ class SparkOnEksStack(core.Stack):
             )
         )
         _config_hms.node.add_dependency(_hms_chart)
-
-        # 5. temp FIX: Hive standalone metastore doesn't support IRSA yet. Use EKS node IAM role instead
-        _source_dir=path.split(environ['VIRTUAL_ENV'])[0]+'/source'
-        _node_iam = load_yaml_replace_var_local(_source_dir+'/app_resources/emr-iam-role.yaml', 
-            fields= {
-                "{{codeBucket}}": self._app_s3.code_bucket
-            })
-        for statmnt in _node_iam:
-            _iam.managed_node_role.add_to_policy(PolicyStatement.from_json(statmnt)
-        )

@@ -100,12 +100,12 @@ class EMREC2Stack(core.NestedStack):
                 termination_protected=False,
                 master_instance_group=CfnCluster.InstanceGroupConfigProperty(
                     instance_count=1, 
-                    instance_type="c5.9xlarge"
+                    instance_type="m5.xlarge"
                 ),
                 additional_master_security_groups=[self._thrift_sg.security_group_id],
                 core_instance_group=CfnCluster.InstanceGroupConfigProperty(
-                    instance_count=5, 
-                    instance_type="c5.9xlarge"
+                    instance_count=1, 
+                    instance_type="m5.xlarge"
                 ),
                 ec2_subnet_id=eks_cluster.vpc.private_subnets[0].subnet_id
             ),
@@ -114,7 +114,7 @@ class EMREC2Stack(core.NestedStack):
                     classification="hive-site",
                     configuration_properties={
                         "javax.jdo.option.ConnectionURL":f"jdbc:mysql://{rds_hostname}:{rds_port}/{rds_dbname}?createDatabaseIfNotExist=true",
-                        "javax.jdo.option.ConnectionDriverName": "org.mariadb.jdbc.Driver",
+                        "javax.jdo.option.ConnectionDriverName": "com.mysql.cj.jdbc.Driver",
                         "javax.jdo.option.ConnectionUserName": rds_username,
                         "javax.jdo.option.ConnectionPassword": rds_pwd
                     },

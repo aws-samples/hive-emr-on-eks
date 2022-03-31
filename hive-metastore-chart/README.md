@@ -14,9 +14,9 @@ Replace placeholders in the [values file](values.yaml) as below. Alternatively, 
 ```bash
 echo -e "\n Default HDFS: $S3BUCKET\n host: $HOST_NAME\n DB: $DB_NAME\n passowrd: $PASSWORD\n username: $USER_NAME\n"
 
-cd hive-emr-on-eks/hive-metastore-chart
+cd hive-metastore-chart
 
-sed -i '' -e 's/{RDS_JDBC_URL}/"jdbc:mysql:\/\/'$HOST_NAME':3306\/'$DB_NAME'?createDatabaseIfNotExist=true&disableMariaDbDriver"/g' values.yaml 
+sed -i '' -e 's/{RDS_JDBC_URL}/"jdbc:mysql:\/\/'$HOST_NAME':3306\/'$DB_NAME'?createDatabaseIfNotExist=true"/g' values.yaml 
 sed -i '' -e 's/{RDS_USERNAME}/'$USER_NAME'/g' values.yaml 
 sed -i '' -e 's/{RDS_PASSWORD}/'$PASSWORD'/g' values.yaml
 sed -i '' -e 's/{S3BUCKET}/s3:\/\/'$S3BUCKET'/g' values.yaml

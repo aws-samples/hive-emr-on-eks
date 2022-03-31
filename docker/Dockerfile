@@ -1,7 +1,7 @@
 FROM openjdk:8-slim
 ARG HMS_VERSION=3.0.0
 ARG HADOOP_VERSION=3.2.1
-ARG aws_java_sdk_version=1.12.75
+ARG aws_java_sdk_version=1.11.880
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN apt-get update && \
@@ -20,7 +20,7 @@ RUN curl -sfSL https://github.com/hairyhenderson/gomplate/releases/download/v3.6
 ENV HADOOP_HOME="/opt/hadoop"
 ENV METASTORE_HOME="/opt/hive-metastore"
 ENV HADOOP_CLASSPATH="${HADOOP_HOME}/share/hadoop/tools/lib/*:${HADOOP_HOME}/share/hadoop/common/lib/*:${METASTORE_HOME}/lib/*"
-ENV PATH="${HADOOP_HOME}/bin:${METASTORE_HOME}/lib/:${HADOOP_HOME}/share/hadoop/tools/lib/:${HADOOP_HOME}/share/hadoop/common/lib/:/opt/hive-metastore/mysql-connector-java.jar:${PATH}"
+ENV PATH="${HADOOP_HOME}/bin:${METASTORE_HOME}/lib/:${HADOOP_HOME}/share/hadoop/tools/lib/:${HADOOP_HOME}/share/hadoop/common/lib/:/opt/hive-metastore/lib/mysql-connector-java.jar:${PATH}"
 
 # Download Hadoop
 RUN curl -s https://archive.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz \
