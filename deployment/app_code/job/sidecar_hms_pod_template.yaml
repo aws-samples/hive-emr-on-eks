@@ -8,6 +8,7 @@ metadata:
 spec:
   containers:
   - name: hms
+    #replace it by your docker image url
     image: ghcr.io/melodyyangaws/hive-metastore:3.0.0
     resources:
       limits:

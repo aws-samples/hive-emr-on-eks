@@ -17,5 +17,8 @@
     <name>fs.s3n.impl</name>
     <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
   </property>
-
+  <property>
+      <name>fs.s3a.aws.credentials.provider</name>
+      <value>com.amazonaws.auth.DefaultAWSCredentialsProviderChain</value>
+  </property>
 </configuration>

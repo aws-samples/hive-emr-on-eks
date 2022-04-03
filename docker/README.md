@@ -7,8 +7,8 @@ If you want to build manually with different build argument, see the sample comm
 ```bash
 cd docker
 export DOCKERHUB_USERNAME=<your_dockerhub_username>
-docker build -t $DOCKERHUB_USERNAME/hive-metastore:3.0.0_hadoop_3.2.1 --build-arg HADOOP_VERSION=3.2.1 --build-arg HMS_VERSION=3.0.0 .
-docker push $DOCKERHUB_USERNAME/hive-metastore:3.0.0_hadoop_3.2.1
+docker build -t $DOCKERHUB_USERNAME/hive-metastore:3.0.0_hadoop_3.3.2 --build-arg HADOOP_VERSION=3.3.2 --build-arg HMS_VERSION=3.0.0 .
+docker push $DOCKERHUB_USERNAME/hive-metastore:3.0.0_hadoop_3.3.2
 ```
 
 - [values.yaml](../hive-metastore-chart/values.yaml): update the docker image name and version on the helm chart value file

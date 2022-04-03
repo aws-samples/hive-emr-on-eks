@@ -45,12 +45,6 @@ Install the folowing tools:
 
 Can use [AWS CloudShell](https://console.aws.amazon.com/cloudshell) that has included all the neccessary software for a quick start.
 
-Additional tools for CDK deployment approach:
-1. [Python 3.6 +](https://www.python.org/downloads/)
-2. [Node.js 10.3.0 +](https://nodejs.org/en/)
-3. [CDK toolkit](https://cdkworkshop.com/15-prerequisites/500-toolkit.html)
-4. [One-off CDK bootstrap](https://cdkworkshop.com/20-typescript/20-create-project/500-deploy.html) for the first time deployment.
-
 ### CloudFormation Deployment
 
   |   Region  |   Launch Template |
@@ -104,14 +98,14 @@ curl https://raw.githubusercontent.com/aws-samples/hive-emr-on-eks/main/deployme
 
 source ~/.bash_profile
 ```
-If you don’t want to install anything on your computer or change your .bash_profile, use [Cloud9](https://console.aws.amazon.com/cloud9/home) or [Cloudshell](https://console.aws.amazon.com/cloudshell/home), browser-based IDE or shell to run commands.
+Can use [Cloud9](https://console.aws.amazon.com/cloud9/home) or [Cloudshell](https://console.aws.amazon.com/cloudshell/home), if you don’t want to install anything on your computer or change your bash_profile, 
 
-2. Build your docker image and update the hive metastore [helm chart image](hive-metastore-chart/values.yaml) by your docker image:
+2. Build HMS docker image and replace the hive metastore [docker image name](hive-metastore-chart/values.yaml) by the new one:
 ```bash
 cd docker
 export DOCKERHUB_USERNAME=<your_dockerhub_name_OR_ECR_URL>
-docker build -t $DOCKERHUB_USERNAME/hive-metastore:3.0.0_hadoop_3.2.1 --build-arg HADOOP_VERSION=3.2.1 --build-arg HMS_VERSION=3.0.0 .
-docker push $DOCKERHUB_USERNAME/hive-metastore:3.0.0_hadoop_3.2.1
+docker build -t $DOCKERHUB_USERNAME/hive-metastore:3.0.0 .
+docker push $DOCKERHUB_USERNAME/hive-metastore:3.0.0
 ```
 
 3. Copy sample data to your S3 bucket:
@@ -265,14 +259,6 @@ aws emr-containers start-job-run \
       "entryPointArguments":["s3://'$S3BUCKET'"],
       "sparkSubmitParameters": "--conf spark.driver.cores=1 --conf spark.executor.memory=4G --conf spark.driver.memory=1G --conf spark.executor.cores=2"}}' \
 --configuration-overrides '{
-  "applicationConfiguration": [
-      {
-        "classification": "spark-defaults", 
-        "properties": {
-          "spark.hadoop.fs.s3a.aws.credentials.provider":"com.amazonaws.auth.WebIdentityTokenCredentialsProvider"
-        }
-      }
-    ],
     "monitoringConfiguration": {
       "s3MonitoringConfiguration": {"logUri": "s3://'$S3BUCKET'/elasticmapreduce/emr-containers"}}}'
 ```  
