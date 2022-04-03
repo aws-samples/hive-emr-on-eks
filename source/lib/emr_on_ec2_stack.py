@@ -114,7 +114,7 @@ class EMREC2Stack(core.NestedStack):
                     classification="hive-site",
                     configuration_properties={
                         "javax.jdo.option.ConnectionURL":f"jdbc:mysql://{rds_hostname}:{rds_port}/{rds_dbname}?createDatabaseIfNotExist=true",
-                        "javax.jdo.option.ConnectionDriverName": "com.mysql.cj.jdbc.Driver",
+                        "javax.jdo.option.ConnectionDriverName": "org.mariadb.jdbc.Driver",
                         "javax.jdo.option.ConnectionUserName": rds_username,
                         "javax.jdo.option.ConnectionPassword": rds_pwd
                     },

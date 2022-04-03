@@ -265,6 +265,14 @@ aws emr-containers start-job-run \
       "entryPointArguments":["s3://'$S3BUCKET'"],
       "sparkSubmitParameters": "--conf spark.driver.cores=1 --conf spark.executor.memory=4G --conf spark.driver.memory=1G --conf spark.executor.cores=2"}}' \
 --configuration-overrides '{
+  "applicationConfiguration": [
+      {
+        "classification": "spark-defaults", 
+        "properties": {
+          "spark.hadoop.fs.s3a.aws.credentials.provider":"com.amazonaws.auth.WebIdentityTokenCredentialsProvider"
+        }
+      }
+    ],
     "monitoringConfiguration": {
       "s3MonitoringConfiguration": {"logUri": "s3://'$S3BUCKET'/elasticmapreduce/emr-containers"}}}'
 ```  
