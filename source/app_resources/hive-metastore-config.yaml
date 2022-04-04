@@ -11,7 +11,8 @@ data:
     }}</value>\n  </property>\n {{- end }}\n <property>\n    <name>fs.s3a.impl</name>\n    <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>\n
     \ </property>   \n  <property>\n    <name>fs.s3.impl</name>\n    <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>\n
     \ </property>\n  <property>\n    <name>fs.s3n.impl</name>\n    <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>\n
-    \ </property>\n</configuration>\n"
+    \ </property>\n <property>\n  <name>fs.s3a.aws.credentials.provider</name>\n <value>com.amazonaws.auth.DefaultAWSCredentialsProviderChain</value>\n 
+    \ </property>\n </configuration>\n"
   metastore-site.xml.tpl: "<configuration>\n  {{- if eq .Env.HIVE_DB_EXTERNAL \"true\" }}\n
     \  <property>\n
     \         <name>javax.jdo.option.ConnectionURL</name>\n          <value>jdbc:mysql://{{.Env.HIVE_DB_HOST}}:{{.Env.HIVE_DB_PORT}}/{{.Env.HIVE_DB_NAME}}?createDatabaseIfNotExist=true</value>\n        </property>\n        <property>\n          <name>javax.jdo.option.ConnectionDriverName</name>\n
