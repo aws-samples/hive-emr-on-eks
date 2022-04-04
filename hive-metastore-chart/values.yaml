@@ -9,10 +9,16 @@ env:
   HIVE_DB_DRIVER: com.mysql.cj.jdbc.Driver
   HIVE_CONF_PARAMS: "hive.metastore.schema.verification:false;hive.metastore.event.db.notification.api.auth:false;hadoop.proxyuser.hive.hosts:HS2_HOST;hadoop.proxyuser.hive.groups:*;datanucleus.schema.autoCreateAll:true;datanucleus.schema.autoCreateTables:true;datanucleus.autoStartMechanism:SchemaTable;datanucleus.fixedDatastore:true"
   HIVE_DB_JDBC_URL: {RDS_JDBC_URL}
+  # either hardcoded here or get from Secrets Manager below
   HIVE_DB_USER: {RDS_USERNAME}
   HIVE_DB_PASS: {RDS_PASSWORD}
   HIVE_WAREHOUSE_S3LOCATION: {S3BUCKET}
 
+# optional: get sensative info from external secret store, such as AWS Secrets Manager
+# secretName: <EKS_SECRET_RESOURCE_NAME>
+# secret:
+  # HIVE_DB_USER: <SECRET_MANAGER_SECRET_KEY_FOR_USERNAME>
+  # HIVE_DB_PASS: <SECRET_MANAGER_SECRET_KEY_FOR_PASSWORD>
 service:
   type: ClusterIP 
 resources:

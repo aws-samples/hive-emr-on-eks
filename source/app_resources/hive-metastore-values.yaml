@@ -14,12 +14,12 @@ env:
   HIVE_DB_DRIVER: com.mysql.cj.jdbc.Driver
   HIVE_CONF_PARAMS: "hive.metastore.schema.verification:false;hive.metastore.event.db.notification.api.auth:false;hadoop.proxyuser.hive.hosts:HS2_HOST;hadoop.proxyuser.hive.groups:*;datanucleus.schema.autoCreateAll:true;datanucleus.schema.autoCreateTables:true;datanucleus.autoStartMechanism:SchemaTable;datanucleus.fixedDatastore:true"
   HIVE_DB_JDBC_URL: {{RDS_JDBC_URL}}
-# sensitive variables mounted from EKS secret using secretKeyRef keyword in the form of
-  # - name: RDS_PASSWORD
+# sensitive variables mounted from EKS secret in the form of
+  # - name: HIVE_DB_PASS  <<<POD_ENV_VAR_NAME
   #   valueFrom:
   #       secretKeyRef:
-  #         name: rds-hms-secret
-  #         key: password   
+  #         name: rds-hms-secret <<<EKS_SECRET_RESOURCE_NAME
+  #         key: password  <<<SECRET_MANAGER_SECRET_KEY_FOR_PASSWORD
 secretName: rds-hms-secret
 secret:
   HIVE_DB_USER: username
