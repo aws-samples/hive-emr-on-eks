@@ -55,7 +55,7 @@ Can use [AWS CloudShell](https://console.aws.amazon.com/cloudshell) that has inc
 * To launch in a different AWS Region, check out the following customization section, or use the CDK deployment option.
 
 ### Customization
-You can customize the solution, for examle remove the EMR on EC2 cluster setup or set to a different deployment region: 
+You can customize the solution, for example deploy to a different AWS region: 
 ```bash
 export BUCKET_NAME_PREFIX=<my-bucket-name> # bucket where customized code will reside
 export AWS_REGION=<your-region>

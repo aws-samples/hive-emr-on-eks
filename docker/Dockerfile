@@ -31,7 +31,7 @@ RUN curl -s -o tools/lib/log4j-1.2-api-2.17.2.jar https://repo1.maven.org/maven2
     curl -s -o tools/lib/log4j-api-2.17.2.jar https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.17.2/log4j-api-2.17.2.jar && \
     curl -s -o tools/lib/log4j-core-2.17.2.jar https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.17.2/log4j-core-2.17.2.jar && \
     curl -s -o tools/lib/log4j-slf4j18-impl-2.17.2.jar https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-slf4j18-impl/2.17.2/log4j-slf4j18-impl-2.17.2.jar  && \
-    curl -s -o tools/lib/mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.28/mysql-connector-java-${MYSQL_CONNECTOR_VERSION}.jar && \
+    curl -s -o tools/lib/mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/${MYSQL_CONNECTOR_VERSION}/mysql-connector-java-${MYSQL_CONNECTOR_VERSION}.jar && \
     ln -s tools/lib/mysql-connector-java* common/lib/ && \
     chmod 0644 tools/lib/*
 

@@ -7,7 +7,7 @@ serviceAccountName: hive
 env:
   HIVE_DB_EXTERNAL: "true"
   HIVE_DB_DRIVER: com.mysql.cj.jdbc.Driver
-  HIVE_CONF_PARAMS: "hive.metastore.schema.verification:false;hive.metastore.event.db.notification.api.auth:false;hadoop.proxyuser.hive.hosts:HS2_HOST;hadoop.proxyuser.hive.groups:*;datanucleus.schema.autoCreateAll:true;datanucleus.schema.autoCreateTables:true;datanucleus.autoStartMechanism:SchemaTable;datanucleus.fixedDatastore:true"
+  HIVE_CONF_PARAMS: "hive.metastore.schema.verification:false;datanucleus.autoCreateSchema:false"
   HIVE_DB_JDBC_URL: {RDS_JDBC_URL}
   # either hardcoded here or get from Secrets Manager below
   HIVE_DB_USER: {RDS_USERNAME}

@@ -10,7 +10,7 @@ emr_release_v=app.node.try_get_context('emr_version')
 
 # main stacks
 eks_stack = SparkOnEksStack(app, 'HiveEMRonEKS', proj_name)
-# Configure RDS as hive metastore DB via EMR on EC2
+# need for initializing the schematool-initSchema
 hive_emr_ec2_stack = EMREC2Stack(eks_stack, 'EMRonEC2', emr_release_v, eks_stack.eks_cluster,eks_stack.code_bucket,eks_stack.rds_secret)
 
 
