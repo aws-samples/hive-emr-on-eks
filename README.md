@@ -9,14 +9,16 @@ The infrastructure deployment includes the following:
 - A RDS Aurora database (MySQL engine) in the same VPC
 - A small EMR on EC2 cluster in the same VPC
     - 1 master & 1 core node (m5.xlarge)
-    - use master node to query the remote hive metastore
+    - use master node to query the remote hive metastore database
 - An EMR virtual cluster in the same VPC
     - registered to `emr` namespace in EKS
     - EMR on EKS configuration is done
+    - Connect to RDS and initialize metastore schema via schematool
 - A standalone Hive metastore service (HMS) in EKS
     - Helm Chart [hive-metastore-chart](./hive-metastore-chart) is provided.
     - run in the same `emr` namespace
     - thrift server is provided for client connections
+    - doesn't initialize/upgrade metastore schemas via schematool
     
 # Spark Examples
 * [1. Connect remote Hive metastore via JDBC](#11-connect-hive-metastore-via-jdbc) 
