@@ -26,15 +26,15 @@
     Resource:
       - '*'  
   - Effect: Allow
-    Action:    
+    Action:
     - logs:PutLogEvents
     - logs:CreateLogStream
     - logs:DescribeLogGroups
     - logs:DescribeLogStreams
     Resource:
     - arn:aws:logs:*:*:*
-    - Effect: Allow
-    Action:    
+  - Effect: Allow
+    Action:
     - glue:Get*
     - glue:BatchCreatePartition
     - glue:UpdateTable
