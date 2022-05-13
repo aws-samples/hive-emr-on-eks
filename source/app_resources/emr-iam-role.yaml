@@ -33,5 +33,15 @@
     - logs:DescribeLogStreams
     Resource:
     - arn:aws:logs:*:*:*
+    - Effect: Allow
+    Action:    
+    - glue:Get*
+    - glue:BatchCreatePartition
+    - glue:UpdateTable
+    - glue:CreateTable
+    Resource:
+    - arn:aws:glue:{{AWS_REGION}}:{{ACCOUNT}}:catalog
+    - arn:aws:glue:{{AWS_REGION}}:{{ACCOUNT}}:database/*
+    - arn:aws:glue:{{AWS_REGION}}:{{ACCOUNT}}:table/*
 
 

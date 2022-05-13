@@ -292,7 +292,7 @@ secret_name=$(aws secretsmanager list-secrets --query 'SecretList[?starts_with(N
 # download the config and apply to EKS
 curl https://raw.githubusercontent.com/aws-samples/hive-emr-on-eks/main/source/app_resources/hive-metastore-config.yaml | sed 's/{SECRET_MANAGER_NAME}/'$secret_name'/g' | kubectl apply -f -
 ```
-- 3. the [HMS sidecar pod template](deployment/app_code/job/sdiecar_hms_pod_template.yaml) is uploaded to an S3 bucket that your Spark job can access.
+- 3. the [HMS sidecar pod template](/deployment/app_code/job/sidecar_hms_pod_template.yaml) is uploaded to an S3 bucket that your Spark job can access.
 
 **sidecar_hivethrift_eks.py:**
 ```python
