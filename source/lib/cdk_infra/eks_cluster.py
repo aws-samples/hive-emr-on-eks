@@ -1,17 +1,14 @@
-from aws_cdk import (
-    core,
-    aws_eks as eks,
-    aws_ec2 as ec2
-)
+from aws_cdk import (aws_eks as eks,aws_ec2 as ec2)
+from constructs import Construct
 from aws_cdk.aws_iam import IRole
 
-class EksConst(core.Construct):
+class EksConst(Construct):
 
     @property
     def my_cluster(self):
         return self._my_cluster  
 
-    def __init__(self, scope: core.Construct, id:str, 
+    def __init__(self, scope: Construct, id:str, 
         eksname: str, 
         eksvpc: ec2.IVpc, 
         noderole: IRole, 
@@ -43,7 +40,7 @@ class EksConst(core.Construct):
             # instance_types = [ec2.InstanceType('c5.9xlarge')],
             instance_types = [ec2.InstanceType('r4.xlarge')],
             labels = {'app':'spark', 'lifecycle':'OnDemand'},
-            subnets = ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE,availability_zones=[eksvpc.availability_zones[0]]),
+            subnets = ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_NAT,availability_zones=[eksvpc.availability_zones[0]]),
             tags = {'Name':'OnDemand-'+eksname,'k8s.io/cluster-autoscaler/enabled': 'true', 'k8s.io/cluster-autoscaler/'+eksname: 'owned'}
         )  
     

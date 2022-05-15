@@ -2,12 +2,8 @@
   "app": "python3 app.py",
   "context": {
     "project_name": "HiveEMRonEKS",
-    "emr_version":"emr-6.5.0",
-    "version": "v1.0.0",
-    "@aws-cdk/core:enableStackNameDuplicates": "true",
-    "aws-cdk:enableDiffNoFail": "true",
-    "@aws-cdk/core:stackRelativeExports": "true",
-    "@aws-cdk/core:newStyleStackSynthesis": "true",
-    "@aws-cdk/aws-secretsmanager:parseOwnedSecretName": "true"
+    "emr_version":"emr-6.3.0",
+    "version": "v2.0.0",
+    "@aws-cdk/core:stackRelativeExports": "false"
   }
 }

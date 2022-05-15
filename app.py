@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from aws_cdk.core import (App,Tags,CfnOutput)
+from aws_cdk import (App,Tags,CfnOutput)
 from source.lib.emr_on_ec2_stack import EMREC2Stack
 from source.lib.spark_on_eks_stack import SparkOnEksStack
 

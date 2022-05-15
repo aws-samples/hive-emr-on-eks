@@ -1,6 +1,7 @@
-from aws_cdk import (core, aws_ec2 as ec2, aws_rds as rds)
+from aws_cdk import (RemovalPolicy, aws_ec2 as ec2, aws_rds as rds)
+from constructs import Construct
 
-class RDS_HMS(core.Construct):
+class RDS_HMS(Construct):
 
     @property
     def secret(self):
@@ -10,7 +11,7 @@ class RDS_HMS(core.Construct):
     def rds_instance(self):
         return self._metastore
 
-    def __init__(self, scope: core.Construct, id: str, cluster_name: str, eksvpc: ec2.IVpc, **kwargs) -> None:
+    def __init__(self, scope: Construct, id: str, cluster_name: str, eksvpc: ec2.IVpc, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
         self._metastore=rds.DatabaseCluster(
@@ -21,11 +22,11 @@ class RDS_HMS(core.Construct):
             ),
             instance_props={
                 "vpc_subnets":{
-                    "subnet_type": ec2.SubnetType.PRIVATE
+                    "subnet_type": ec2.SubnetType.PRIVATE_WITH_NAT
                 },
                 "vpc": eksvpc
             },
-            removal_policy=core.RemovalPolicy.DESTROY
+            removal_policy=RemovalPolicy.DESTROY
         )
         # Allow EMR & EKS cluster to connect to the RDS hive metastore
         self._metastore.connections.security_groups[0].add_ingress_rule(

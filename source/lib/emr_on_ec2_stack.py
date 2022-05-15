@@ -1,5 +1,9 @@
+from constructs import Construct
 from aws_cdk import (
-    core, 
+    Aws,
+    NestedStack,
+    Tags,
+    CfnTag,
     aws_iam as iam,
     aws_ec2 as ec2,
     aws_eks as eks
@@ -10,14 +14,14 @@ from aws_cdk.aws_secretsmanager import Secret
 from lib.util.manifest_reader import load_yaml_replace_var_local
 import os
 
-class EMREC2Stack(core.NestedStack):
+class EMREC2Stack(NestedStack):
 
-    def __init__(self, scope: core.Construct, id: str, emr_version: str, eks_cluster: eks.ICluster, code_bucket:str, rds_secret: Secret, **kwargs) -> None:
+    def __init__(self, scope: Construct, id: str, emr_version: str, eks_cluster: eks.ICluster, code_bucket:str, rds_secret: Secret, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
         source_dir=os.path.split(os.environ['VIRTUAL_ENV'])[0]+'/source'
         # The VPC requires a Tag to allow EMR to create the relevant security groups
-        core.Tags.of(eks_cluster.vpc).add("for-use-with-amazon-emr-managed-policies", "true")   
+        Tags.of(eks_cluster.vpc).add("for-use-with-amazon-emr-managed-policies", "true")   
 
         ##########################
         ######             #######
@@ -33,7 +37,9 @@ class EMREC2Stack(core.NestedStack):
         )
         _iam = load_yaml_replace_var_local(source_dir+'/app_resources/emr-iam-role.yaml', 
             fields= {
-                "{{codeBucket}}": code_bucket
+                "{{codeBucket}}": code_bucket,
+                "{{AWS_REGION}}": Aws.REGION,
+                "{{ACCOUNT}}": Aws.ACCOUNT_ID
             })
         for statmnt in _iam:
             emr_job_role.add_to_policy(iam.PolicyStatement.from_json(statmnt)
@@ -121,8 +127,8 @@ class EMREC2Stack(core.NestedStack):
                 )
             ],
             tags=[
-                core.CfnTag(key="for-use-with-amazon-emr-managed-policies", value="true"),
-                core.CfnTag(key="project", value=eks_cluster.cluster_name)
+                CfnTag(key="for-use-with-amazon-emr-managed-policies", value="true"),
+                CfnTag(key="project", value=eks_cluster.cluster_name)
             ]
         )
         self._emr_c.add_depends_on(emr_job_flow_profile)

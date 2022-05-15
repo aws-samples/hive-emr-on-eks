@@ -1,6 +1,6 @@
 # RDS as Hive metastore for EMR on EKS
 
-This is a project developed in Python [CDK](https://docs.aws.amazon.com/cdk/latest/guide/home.html).
+This is a project developed in Python [CDKv2](https://docs.aws.amazon.com/cdk/latest/guide/home.html).
 It includes few Spark examples that create external hive tables on top of sample dataset stored in S3. These jobs will run with EMR on EKS. 
 
 The infrastructure deployment includes the following:
@@ -52,7 +52,7 @@ Can use [AWS CloudShell](https://console.aws.amazon.com/cloudshell) that has inc
   |   Region  |   Launch Template |
   |  ---------------------------   |   -----------------------  |
   |  ---------------------------   |   -----------------------  |
-  **US East (N. Virginia)**| [![Deploy to AWS](source/app_resources/00-deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?stackName=HiveEMRonEKS&templateURL=https://blogpost-sparkoneks-us-east-1.s3.amazonaws.com/hive-emr-on-eks/v1.0.0/HiveEMRonEKS.template) 
+  **US East (N. Virginia)**| [![Deploy to AWS](source/app_resources/00-deploy-to-aws.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?stackName=HiveEMRonEKS&templateURL=https://blogpost-sparkoneks-us-east-1.s3.amazonaws.com/hive-emr-on-eks/v2.0.0/HiveEMRonEKS.template) 
 
 * To launch in a different AWS Region, check out the following customization section, or use the CDK deployment option.
 
@@ -62,7 +62,7 @@ You can customize the solution, for example deploy to a different AWS region:
 export BUCKET_NAME_PREFIX=<my-bucket-name> # bucket where customized code will reside
 export AWS_REGION=<your-region>
 export SOLUTION_NAME=hive-emr-on-eks
-export VERSION=v1.0.0 # version number for the customized code
+export VERSION=v2.0.0 # version number for the customized code
 
 ./deployment/build-s3-dist.sh $BUCKET_NAME_PREFIX $SOLUTION_NAME $VERSION
 
@@ -146,7 +146,7 @@ aws emr-containers start-job-run \
 --virtual-cluster-id $VIRTUAL_CLUSTER_ID \
 --name spark-hive-via-jdbc \
 --execution-role-arn $EMR_ROLE_ARN \
---release-label emr-6.2.0-latest \
+--release-label emr-6.3.0-latest \
 --job-driver '{
   "sparkSubmitJobDriver": {
       "entryPoint": "s3://'$S3BUCKET'/app_code/job/hivejdbc.py",
@@ -207,7 +207,7 @@ aws emr-containers start-job-run \
 --virtual-cluster-id $VIRTUAL_CLUSTER_ID \
 --name spark-hive-via-thrift \
 --execution-role-arn $EMR_ROLE_ARN \
---release-label emr-6.2.0-latest \
+--release-label emr-6.3.0-latest \
 --job-driver '{
   "sparkSubmitJobDriver": {
       "entryPoint": "s3://'$S3BUCKET'/app_code/job/hivethrift_emr.py",
@@ -254,7 +254,7 @@ aws emr-containers start-job-run \
 --virtual-cluster-id $VIRTUAL_CLUSTER_ID \
 --name spark-hive-via-thrift \
 --execution-role-arn $EMR_ROLE_ARN \
---release-label emr-6.2.0-latest \
+--release-label emr-6.3.0-latest \
 --job-driver '{
   "sparkSubmitJobDriver": {
       "entryPoint": "s3://'$S3BUCKET'/app_code/job/hivethrift_eks.py",

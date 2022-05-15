@@ -1,13 +1,10 @@
-from aws_cdk import (
-    core,
-    aws_iam as iam,
-    aws_emrcontainers as emrc
-)
+from aws_cdk import (Aws, CfnJson, aws_iam as iam,aws_emrcontainers as emrc)
+from constructs import Construct
 from aws_cdk.aws_eks import ICluster, KubernetesManifest
 from lib.util.manifest_reader import load_yaml_replace_var_local
 import os
 
-class AppSecConst(core.Construct):
+class AppSecConst(Construct):
 
     @property
     def EMRVC(self):
@@ -17,7 +14,7 @@ class AppSecConst(core.Construct):
     def EMRExecRole(self):
         return self._emr_exec_role.role_arn 
 
-    def __init__(self,scope: core.Construct, id: str, 
+    def __init__(self,scope: Construct, id: str, 
         eks_cluster: ICluster, 
         code_bucket: str,
         **kwargs) -> None:
@@ -95,9 +92,9 @@ class AppSecConst(core.Construct):
         _eks_oidc_provider=eks_cluster.open_id_connect_provider 
         _eks_oidc_issuer=_eks_oidc_provider.open_id_connect_provider_issuer 
          
-        sub_str_like = core.CfnJson(self, "ConditionJsonIssuer",
+        sub_str_like = CfnJson(self, "ConditionJsonIssuer",
             value={
-                f"{_eks_oidc_issuer}:sub": f"system:serviceaccount:{_emr_01_name}:emr-containers-sa-*-*-{core.Aws.ACCOUNT_ID}-*"
+                f"{_eks_oidc_issuer}:sub": f"system:serviceaccount:{_emr_01_name}:emr-containers-sa-*-*-{Aws.ACCOUNT_ID}-*"
             }
         )
         self._emr_exec_role.assume_role_policy.add_statements(
@@ -107,7 +104,7 @@ class AppSecConst(core.Construct):
                 principals=[iam.OpenIdConnectPrincipal(_eks_oidc_provider, conditions={"StringLike": sub_str_like})])
         )
 
-        aud_str_like = core.CfnJson(self,"ConditionJsonAudEMR",
+        aud_str_like = CfnJson(self,"ConditionJsonAudEMR",
             value={
                 f"{_eks_oidc_issuer}:aud": "sts.amazon.com"
             }
@@ -129,8 +126,8 @@ class AppSecConst(core.Construct):
         _emr_iam = load_yaml_replace_var_local(source_dir+'/app_resources/emr-iam-role.yaml',
             fields={
                  "{{codeBucket}}": code_bucket,
-                 "{{AWS_REGION}}": core.Aws.REGION,
-                 "{{ACCOUNT}}": core.Aws.ACCOUNT_ID
+                 "{{AWS_REGION}}": Aws.REGION,
+                 "{{ACCOUNT}}": Aws.ACCOUNT_ID
             }
         )
         for statmnt in _emr_iam:

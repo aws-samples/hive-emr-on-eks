@@ -21,7 +21,7 @@ except IOError as e:
 
 setuptools.setup(
     name="hive-hms-demo",
-    version="1.0.0",
+    version="2.0.0",
 
     description="A CDK Python app for Spark hive metastore on EKS",
     long_description=long_description,
@@ -33,17 +33,8 @@ setuptools.setup(
     packages=setuptools.find_packages(where="source"),
 
     install_requires=[
-        "aws-cdk.core==1.148.0",
-        "aws-cdk.aws_iam==1.148.0",
-        "aws-cdk.aws_eks==1.148.0",
-        "aws-cdk.aws_ec2==1.148.0",
-        "aws-cdk.aws_s3==1.148.0",
-        "aws-cdk.aws_s3_deployment==1.148.0",
-        "aws-cdk.aws-emrcontainers==1.148.0",
-        "aws-cdk.aws-emr==1.148.0",
-        "aws-cdk.aws-rds==1.148.0",
-        # "aws_cdk.aws-efs==1.148.0",
-        "aws-cdk.aws-secretsmanager==1.148.0",
+        "aws-cdk-lib==2.12.0",
+        "constructs>=10.0.0,<11.0.0",
         "pyyaml==5.4"
     ],
 

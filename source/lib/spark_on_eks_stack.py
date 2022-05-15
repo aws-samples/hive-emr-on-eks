@@ -1,5 +1,6 @@
-from aws_cdk import core, aws_eks as eks
+from aws_cdk import (Stack, aws_eks as eks)
 from aws_cdk.aws_iam import PolicyStatement
+from constructs import Construct
 
 from lib.cdk_infra.iam_roles import IamConst 
 from lib.cdk_infra.network_sg import NetworkSgConst
@@ -14,7 +15,7 @@ from lib.cdk_infra.rds import RDS_HMS
 from lib.util.manifest_reader import load_yaml_replace_var_local
 from os import path,environ
 
-class SparkOnEksStack(core.Stack):
+class SparkOnEksStack(Stack):
 
     @property
     def code_bucket(self):
@@ -36,7 +37,7 @@ class SparkOnEksStack(core.Stack):
     def EMRExecRole(self):
         return self._emr_sec.EMRExecRole        
         
-    def __init__(self, scope: core.Construct, id: str, eksname: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, id: str, eksname: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
         # 1. a new bucket to store application code
@@ -57,7 +58,7 @@ class SparkOnEksStack(core.Stack):
 
         
         # 4. Install Hive metastore chart to EKS
-        _secret_name ="rds-hms-secret"
+        # _secret_name ="rds-hms-secret"
         _rds_endpoint=self._rds_hms.rds_instance.cluster_endpoint
         source_dir=path.split(environ['VIRTUAL_ENV'])[0]+'/source'
 

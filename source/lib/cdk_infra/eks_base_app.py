@@ -1,5 +1,6 @@
 from aws_cdk.aws_ec2 import ISecurityGroup,SubnetSelection,SubnetType
-from aws_cdk.core import Aws, Construct, RemovalPolicy
+from aws_cdk import Aws, RemovalPolicy
+from constructs import Construct
 from aws_cdk.aws_eks import ICluster, KubernetesManifest
 # import aws_cdk.aws_efs as efs
 from lib.util.manifest_reader import *
@@ -77,7 +78,7 @@ class EksBaseAppConst(Construct):
         #     lifecycle_policy=efs.LifecyclePolicy.AFTER_7_DAYS,
         #     performance_mode=efs.PerformanceMode.MAX_IO,
         #     removal_policy=RemovalPolicy.DESTROY,
-        #     vpc_subnets=SubnetSelection(subnet_type=SubnetType.PRIVATE, one_per_az=True)
+        #     vpc_subnets=SubnetSelection(subnet_type=SubnetType.PRIVATE_WITH_NAT, one_per_az=True)
         # )
         # _pv= KubernetesManifest(self,'pvClaim',
         #     cluster=eks_cluster,

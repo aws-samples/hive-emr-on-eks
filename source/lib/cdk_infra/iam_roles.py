@@ -1,9 +1,7 @@
-from aws_cdk import (
-    core,
-    aws_iam as iam
-)
+from aws_cdk import (Tags, Aws, RemovalPolicy, aws_iam as iam)
+from constructs import Construct
 
-class IamConst(core.Construct):
+class IamConst(Construct):
 
     @property
     def managed_node_role(self):
@@ -17,7 +15,7 @@ class IamConst(core.Construct):
     def emr_svc_role(self):
         return self._emrsvcrole 
 
-    def __init__(self,scope: core.Construct, id:str, cluster_name:str, **kwargs,) -> None:
+    def __init__(self,scope: Construct, id:str, cluster_name:str, **kwargs,) -> None:
         super().__init__(scope, id, **kwargs)
 
         # EKS admin role
@@ -34,7 +32,7 @@ class IamConst(core.Construct):
                 "iam:ListRoles"
             ],
         ))
-        core.Tags.of(self._clusterAdminRole).add(
+        Tags.of(self._clusterAdminRole).add(
             key='eks/%s/type' % cluster_name, 
             value='admin-role'
         )
@@ -52,10 +50,10 @@ class IamConst(core.Construct):
             assumed_by=iam.ServicePrincipal('ec2.amazonaws.com'),
             managed_policies=list(_managed_node_managed_policies),
         )
-        self._managed_node_role.apply_removal_policy(core.RemovalPolicy.DESTROY)
+        self._managed_node_role.apply_removal_policy(RemovalPolicy.DESTROY)
 
         # EMR container service role
         self._emrsvcrole = iam.Role.from_role_arn(self, "EmrSvcRole", 
-            role_arn=f"arn:aws:iam::{core.Aws.ACCOUNT_ID}:role/AWSServiceRoleForAmazonEMRContainers", 
+            role_arn=f"arn:aws:iam::{Aws.ACCOUNT_ID}:role/AWSServiceRoleForAmazonEMRContainers", 
             mutable=False
         )
