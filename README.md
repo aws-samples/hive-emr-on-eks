@@ -27,6 +27,7 @@ The infrastructure deployment includes the following:
 * [4. Connect Hive via hms sidecar](#41-run-the-thrift-service-as-a-sidecar-in-spark-drivers-pod)
 * [5. Hudi with hms sidecar](#43-hudi--remote-hive-metastore-integration)
 * [6. Hudi with Glue catalog](#44-hudi--glue-catalog-integration)
+* [7. Run Hive SQL with EMR on EKS](#45-run-hive-sql-with-emr-on-eks)
 
 # Key Artifacts
 - **Job source code** - [deployment/app_code/job](deployment/app_code/job).
@@ -102,7 +103,7 @@ source ~/.bash_profile
 ```
 Can use [Cloud9](https://console.aws.amazon.com/cloud9/home) or [Cloudshell](https://console.aws.amazon.com/cloudshell/home), if you don’t want to install anything on your computer or change your bash_profile, 
 
-2. Build HMS docker image and replace the hive metastore [docker image name](hive-metastore-chart/values.yaml) by the new one:
+2. [OPTIONAL] Build HMS docker image and replace the hive metastore docker image name in [hive-metastore-chart/values.yaml](hive-metastore-chart/values.yaml) by the new one if needed:
 ```bash
 cd docker
 export DOCKERHUB_USERNAME=<your_dockerhub_name_OR_ECR_URL>
@@ -433,6 +434,51 @@ aws emr-containers start-job-run \
     "monitoringConfiguration": {
       "s3MonitoringConfiguration": {"logUri": "s3://'$S3BUCKET'/elasticmapreduce/emr-containers"}}}'
 ```
+[*^ back to top*](#spark-examples)
+## 4.5 Run Hive SQL with EMR on EKS
+We can run [Hive SQL scripts](deployment/app_code/job/set-of-hive-queries.sql) using the Spark execution engine. From EMR 6.7, EMR on EKS now supports the ability to run Spark SQL, using a `.sql` file as the entrypoint script in the StartJobRun API. Make sure your AWS CLI >= 2.7.31 .
+
+Sample Hive SQL file:
+```bash
+CREATE DATABASE IF NOT EXISTS hiveonspark;
+CREATE TABLE IF NOT EXISTS hiveonspark.amazonreview( marketplace string, customer_id string, review_id  string, product_id  string, product_parent  string, product_title  string, star_rating  integer, helpful_votes  integer, total_votes  integer, vine  string, verified_purchase  string, review_headline  string, review_body  string, review_date  date, year  integer) STORED AS PARQUET LOCATION 's3://<S3BUCKET>/app_code/data/toy/';
+SELECT count(*) FROM hiveonspark.amazonreview;
+```
+Run the submission script:
+```bash
+curl https://raw.githubusercontent.com/aws-samples/hive-emr-on-eks/main/deployment/app_code/job/submit-sparksql.sh | bash
+```
+OR 
+
+```bash
+aws emr-containers start-job-run \
+--virtual-cluster-id $VIRTUAL_CLUSTER_ID \
+--name sparksql-test \
+--execution-role-arn $EMR_ROLE_ARN \
+--release-label emr-6.8.0-latest \
+--job-driver '{
+  "sparkSqlJobDriver": {
+      "entryPoint": "s3://'$S3BUCKET'/app_code/job/set-of-hive-queries.sql",
+      "sparkSqlParameters": "--conf spark.driver.cores=1 --conf spark.executor.memory=4G --conf spark.driver.memory=1G --conf spark.executor.cores=2"}}' \
+--configuration-overrides '{
+    "applicationConfiguration": [
+      {
+        "classification": "spark-defaults", 
+        "properties": {
+          "spark.hive.metastore.uris": "thrift://hive-metastore:9083"
+        }
+      }
+    ], 
+    "monitoringConfiguration": {
+      "persistentAppUI": "ENABLED",
+      "s3MonitoringConfiguration": {"logUri": "s3://'$S3BUCKET'/elasticmapreduce/emr-containers"}}}'
+```
+In this case, we are connecting to the standalone HMS `thrift://hive-metastore:9083` that is running in the same namespace `emr`. To makde the SparkSQL/HiveSQL work with EMR on EKS, we need to replace the following attributes:
+ -  change from `sparkSubmitJobDriver` to `sparkSqlJobDriver` 
+ -  change from `sparkSubmitParameters` to `sparkSqlParameters`
+
+<img src="source/img/7-hive-metastore-pod.png" width="350">
+
 [*^ back to top*](#spark-examples)
 
 ## Verify the job is running in EKS

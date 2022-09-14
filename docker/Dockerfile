@@ -4,7 +4,7 @@ ARG HADOOP_VERSION=3.3.2
 ARG MYSQL_CONNECTOR_VERSION=8.0.28
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-RUN apt-get update && apt-get install -y curl unzip --no-install-recommends && \
+RUN apt-get update && apt-get install -y curl unzip procps --no-install-recommends && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
