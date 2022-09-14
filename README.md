@@ -436,9 +436,9 @@ aws emr-containers start-job-run \
 ```
 [*^ back to top*](#spark-examples)
 ## 4.5 Run Hive SQL with EMR on EKS
-We can run [Hive SQL scripts](deployment/app_code/job/set-of-hive-queries.sql) using the Spark execution engine. From EMR 6.7, EMR on EKS now supports the ability to run Spark SQL, using a `.sql` file as the entrypoint script in the StartJobRun API. Make sure your AWS CLI >= 2.7.31 .
+We can run Hive SQL script with multiple lines using the Spark execution engine. From EMR 6.7, EMR on EKS now supports the ability to run Spark SQL, using a `.sql` file as the entrypoint script in the StartJobRun API. Make sure your AWS CLI >= 2.7.31 .
 
-Sample Hive SQL file:
+Sample [Hive SQL file](deployment/app_code/job/set-of-hive-queries.sql):
 ```bash
 CREATE DATABASE IF NOT EXISTS hiveonspark;
 CREATE TABLE IF NOT EXISTS hiveonspark.amazonreview( marketplace string, customer_id string, review_id  string, product_id  string, product_parent  string, product_title  string, star_rating  integer, helpful_votes  integer, total_votes  integer, vine  string, verified_purchase  string, review_headline  string, review_body  string, review_date  date, year  integer) STORED AS PARQUET LOCATION 's3://<S3BUCKET>/app_code/data/toy/';
@@ -477,7 +477,7 @@ In this case, we are connecting to the standalone HMS `thrift://hive-metastore:9
  -  change from `sparkSubmitJobDriver` to `sparkSqlJobDriver` 
  -  change from `sparkSubmitParameters` to `sparkSqlParameters`
 
-<img src="source/img/7-hive-metastore-pod.png" width="350">
+<img src="source/img/7-hive-metastore-pod.png">
 
 [*^ back to top*](#spark-examples)
 
