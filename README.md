@@ -25,9 +25,9 @@ The infrastructure deployment includes the following:
 * [2. Connect Hive via EMR on EC2](#21-connect-hive-metastore-via-thrift-service-hosted-on-emr-on-ec2) 
 * [3. Connect Hive via EMR on EKS](#31-connect-hive-metastore-via-thrift-service-hosted-on-eks)
 * [4. Connect Hive via hms sidecar](#41-run-the-thrift-service-as-a-sidecar-in-spark-drivers-pod)
-* [5. Hudi with hms sidecar](#43-hudi--remote-hive-metastore-integration)
-* [6. Hudi with Glue catalog](#44-hudi--glue-catalog-integration)
-* [7. Run Hive SQL with EMR on EKS](#45-run-hive-sql-with-emr-on-eks)
+* [5. Hudi with hms sidecar](#5-hudi--remote-hive-metastore-integration)
+* [6. Hudi with Glue catalog](#6-hudi--glue-catalog-integration)
+* [7. Run Hive SQL with EMR on EKS](#7-run-hive-sql-with-emr-on-eks)
 
 # Key Artifacts
 - **Job source code** - [deployment/app_code/job](deployment/app_code/job).
@@ -355,7 +355,7 @@ aws emr-containers start-job-run \
 ```
 [*^ back to top*](#spark-examples)
 
-## 4.3 Hudi + Remote Hive metastore integration
+## 5. Hudi + Remote Hive metastore integration
 <img src="source/img/5-hudi-hms-sidecar.png" width="350">
 
 - Sample job - [HudiEMRonEKS.py](deployment/app_code/job/HudiEMRonEKS.py)
@@ -396,7 +396,7 @@ aws emr-containers start-job-run \
 ```
 [*^ back to top*](#spark-examples)
 
-## 4.4 Hudi + Glue Catalog Integration
+## 6. Hudi + Glue Catalog Integration
 <img src="source/img/6-hudi-glue.png" width="350">
 
 `Note: make esure the database ** default ** exists in your Glue catalog`
@@ -435,7 +435,7 @@ aws emr-containers start-job-run \
       "s3MonitoringConfiguration": {"logUri": "s3://'$S3BUCKET'/elasticmapreduce/emr-containers"}}}'
 ```
 [*^ back to top*](#spark-examples)
-## 4.5 Run Hive SQL with EMR on EKS
+## 7. Run Hive SQL with EMR on EKS
 We can run Hive SQL script with multiple lines using the Spark execution engine. From `EMR 6.7`, EMR on EKS now supports the ability to run Spark SQL, using a `.sql` file as the entrypoint script in the StartJobRun API. Make sure your AWS CLI version is `2.7.31+ or 1.25.70+`.
 
 See the sample [Hive sql script](deployment/app_code/job/set-of-hive-queries.sql):
