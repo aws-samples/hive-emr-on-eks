@@ -1,4 +1,3 @@
-# -hiveconf mybuclet='$S3BUCKET' 
 aws emr-containers start-job-run \
 --virtual-cluster-id $VIRTUAL_CLUSTER_ID \
 --name sparksql-test \
@@ -13,10 +12,10 @@ aws emr-containers start-job-run \
       {
         "classification": "spark-defaults", 
         "properties": {
-          "spark.hive.metastore.uris": "thrift://hive-metastore:9083"
+          "spark.hive.metastore.uris": "thrift://hive-metastore:9083",
+          "spark.sql.warehouse.dir": "s3://'$S3BUCKET'/warehouse/"
         }
       }
     ], 
     "monitoringConfiguration": {
-      "persistentAppUI": "ENABLED",
       "s3MonitoringConfiguration": {"logUri": "s3://'$S3BUCKET'/elasticmapreduce/emr-containers"}}}'
