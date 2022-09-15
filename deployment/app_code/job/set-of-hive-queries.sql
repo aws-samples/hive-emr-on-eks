@@ -9,10 +9,10 @@ SELECT * FROM testtable WHERE key=238;
 
 -- test1: add column
 ALTER TABLE testtable ADD COLUMNS (`arrayCol` Array<int>);
+-- test2: insert
 INSERT INTO testtable VALUES 
 (238,'val_238',array(1,3)),
 (238,'val_238',array(2,3));
--- test2: insert
 SELECT * FROM testtable WHERE key=238;
 -- test3: UDF
 CREATE TEMPORARY FUNCTION hiveUDF AS 'org.apache.hadoop.hive.ql.udf.generic.GenericUDTFExplode';
