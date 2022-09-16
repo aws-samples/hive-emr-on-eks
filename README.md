@@ -529,7 +529,7 @@ OK
 Time taken: 23.742 seconds, Fetched: 1 row(s)
 +--------+
 ```
-## Get logs fron S3
+## Get logs from S3
 `s3://$S3BUCKET/elasticmapreduce/emr-containers/$VIRTUAL_CLUSTER_ID/jobs/<YOUR_JOB_ID>/containers/spark-<YOUR-JOB-ID>-driver/`
 
 ## Useful commands
