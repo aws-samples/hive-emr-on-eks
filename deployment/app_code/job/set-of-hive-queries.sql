@@ -16,9 +16,9 @@ INSERT INTO testtable VALUES
 SELECT * FROM testtable WHERE key=238;
 -- test3: UDF
 CREATE TEMPORARY FUNCTION hiveUDF AS 'org.apache.hadoop.hive.ql.udf.generic.GenericUDTFExplode';
-SELECT `key`,`value`,hiveUDF(arrayCol) FROM testtable WHERE key=238;
+SELECT `key`,`value`,hiveUDF(arrayCol) FROM testtable WHERE key=${Key_ID};
 
 --Hive external table mapped to S3 data
 DROP TABLE IF EXISTS amazonreview;
-CREATE EXTERNAL TABLE IF NOT EXISTS amazonreview( marketplace string, customer_id string, review_id  string, product_id  string, product_parent  string, product_title  string, star_rating  integer, helpful_votes  integer, total_votes  integer, vine  string, verified_purchase  string, review_headline  string, review_body  string, review_date  date, year  integer) STORED AS PARQUET LOCATION 's3://<<S3BUCKET>>/app_code/data/toy/';
+CREATE EXTERNAL TABLE IF NOT EXISTS amazonreview( marketplace string, customer_id string, review_id  string, product_id  string, product_parent  string, product_title  string, star_rating  integer, helpful_votes  integer, total_votes  integer, vine  string, verified_purchase  string, review_headline  string, review_body  string, review_date  date, year  integer) STORED AS PARQUET LOCATION 's3://${S3Bucket}/app_code/data/toy/';
 SELECT count(*) FROM amazonreview;
