@@ -438,16 +438,20 @@ aws emr-containers start-job-run \
 ## 7. Run Hive SQL with EMR on EKS
 We can run Hive SQL script with multiple lines using the Spark execution engine. From `EMR 6.7`, EMR on EKS now supports the ability to run Spark SQL, using a `.sql` file as the entrypoint script in the StartJobRun API. Make sure your AWS CLI version is `2.7.31+ or 1.25.70+`.
 
-See the sample [Hive sql script](deployment/app_code/job/set-of-hive-queries.sql):
+See the full version of the sample [Hive sql script](deployment/app_code/job/set-of-hive-queries.sql).
+code snippet:
 ```bash
 CREATE DATABASE IF NOT EXISTS hiveonspark;
 UES hiveonspark;
 DROP TABLE IF EXISTS amazonreview;
-CREATE EXTERNAL TABLE IF NOT EXISTS amazonreview( marketplace string, customer_id string, review_id  string, product_id  string, product_parent  string, product_title  string, star_rating  integer, helpful_votes  integer, total_votes  integer, vine  string, verified_purchase  string, review_headline  string, review_body  string, review_date  date, year  integer) STORED AS PARQUET LOCATION 's3://<<S3BUCKET>>/app_code/data/toy/';
+CREATE EXTERNAL TABLE IF NOT EXISTS amazonreview(.....) STORED AS PARQUET LOCATION 's3://${S3BUCKET}/app_code/data/toy/';
 SELECT count(*) FROM amazonreview;
 ```
-
-Replace the placeholder `S3BUCKET`, then run the submission script:
+Run the submission script:
+```bash
+curl https://raw.githubusercontent.com/aws-samples/hive-emr-on-eks/main/deployment/app_code/job/submit-sparksql.sh | bash
+```
+OR run the following:
 
 ```bash
 aws emr-containers start-job-run \
@@ -458,20 +462,23 @@ aws emr-containers start-job-run \
 --job-driver '{
   "sparkSqlJobDriver": {
       "entryPoint": "s3://'$S3BUCKET'/app_code/job/set-of-hive-queries.sql",
-      "sparkSqlParameters": "--conf spark.driver.cores=1 --conf spark.executor.memory=4G --conf spark.driver.memory=1G --conf spark.executor.cores=2"}}' \
+      "sparkSqlParameters": "-hivevar S3Bucket='$S3BUCKET' -hivevar Key_ID=238"}}' \
 --configuration-overrides '{
     "applicationConfiguration": [
       {
         "classification": "spark-defaults", 
         "properties": {
-          "spark.hive.metastore.uris": "thrift://hive-metastore:9083"
+          "spark.hive.metastore.uris": "thrift://hive-metastore:9083",
+          "spark.hadoop.hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
         }
       }
     ], 
     "monitoringConfiguration": {
       "s3MonitoringConfiguration": {"logUri": "s3://'$S3BUCKET'/elasticmapreduce/emr-containers"}}}'
 ```
-In this case, we are connecting to the standalone HMS `thrift://hive-metastore:9083` that is running in a k8s pod in the namespace `emr`. To execute Hive sql scripts with EMR on EKS, just replace these attributes in the submission script:
+In this case, we are connecting to the standalone HMS `thrift://hive-metastore:9083` that is running as a k8s pod in the namespace `emr`. 
+
+NOTE: to directly submit Hive scripts to EMR on EKS, replace the following 2 attributes in the job submission script:
  -  change from `sparkSubmitJobDriver` to `sparkSqlJobDriver` 
  -  change from `sparkSubmitParameters` to `sparkSqlParameters`
 
