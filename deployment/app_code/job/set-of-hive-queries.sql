@@ -1,10 +1,11 @@
-CREATE DATABASE IF NOT EXISTS hiveonspark;
+-- drop database in case switch between different hive metastore	
+DROP DATABASE IF EXISTS hiveonspark CASCADE;
+CREATE DATABASE hiveonspark;
 USE hiveonspark;
 
 --create hive managed table
-DROP TABLE IF EXISTS testtable purge;
 CREATE TABLE IF NOT EXISTS testtable (`key` INT, `value` STRING) using hive;
-LOAD DATA LOCAL INPATH '/usr/lib/spark/examples/src/main/resources/kv1.txt' INTO TABLE testtable;
+LOAD DATA LOCAL INPATH '/usr/lib/spark/examples/src/main/resources/kv1.txt' OVERWRITE INTO TABLE testtable;
 SELECT * FROM testtable WHERE key=238;
 
 -- test1: add column
@@ -18,15 +19,13 @@ SELECT * FROM testtable WHERE key=238;
 CREATE TEMPORARY FUNCTION hiveUDF AS 'org.apache.hadoop.hive.ql.udf.generic.GenericUDTFExplode';
 SELECT `key`,`value`,hiveUDF(arrayCol) FROM testtable WHERE key=238;
 -- test4: CTAS table
-DROP TABLE IF EXISTS ctas_testtable purge;
-CREATE TABLE ctas_testtable
+CREATE TABLE ctas_testtable IF NOT EXISTS
 STORED AS ORC
 AS
 SELECT * FROM testtable;
 SELECT * FROM ctas_testtable WHERE key=${Key_ID};
 
 -- test5: External table mapped to S3
-DROP TABLE IF EXISTS amazonreview;
 CREATE EXTERNAL TABLE IF NOT EXISTS amazonreview
 ( 
 	marketplace string, 

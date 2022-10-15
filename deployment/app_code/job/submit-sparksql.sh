@@ -1,3 +1,4 @@
+# "spark.hive.metastore.uris": "thrift://hive-metastore:9083"
 aws emr-containers start-job-run \
   --virtual-cluster-id $VIRTUAL_CLUSTER_ID \
   --name sparksql-test \
@@ -12,7 +13,6 @@ aws emr-containers start-job-run \
       {
         "classification": "spark-defaults", 
         "properties": {
-          "spark.hive.metastore.uris": "thrift://hive-metastore:9083",
           "spark.hadoop.hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
         }
       }

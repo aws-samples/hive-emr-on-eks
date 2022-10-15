@@ -388,7 +388,7 @@ aws emr-containers start-job-run \
           "spark.serializer": "org.apache.spark.serializer.KryoSerializer",
           "spark.sql.hive.convertMetastoreParquet": "false",
           "spark.hive.metastore.uris": "thrift://localhost:9083",
-	      "spark.kubernetes.driver.podTemplateFile": "s3://'$S3BUCKET'/app_code/job/sidecar_hms_pod_template.yaml"
+	        "spark.kubernetes.driver.podTemplateFile": "s3://'$S3BUCKET'/app_code/job/sidecar_hms_pod_template.yaml"
         }}
     ], 
     "monitoringConfiguration": {
@@ -402,7 +402,7 @@ aws emr-containers start-job-run \
 `Note: make esure the database ** default ** exists in your Glue catalog`
 
 - Same Hudi job - [HudiEMRonEKS.py](deployment/app_code/job/HudiEMRonEKS.py)
-- Job submission with Glue catalog - [submit-hudi-glue.sh](deployment/app_code/job/sidecar_submit-hudi-hms.sh)
+- Job submission with Glue catalog - [submit-hudi-glue.sh](deployment/app_code/job/submit-hudi-glue.sh)
 
 Run the submission script:
 ```bash
@@ -468,7 +468,6 @@ aws emr-containers start-job-run \
       {
         "classification": "spark-defaults", 
         "properties": {
-          "spark.hive.metastore.uris": "thrift://hive-metastore:9083",
           "spark.hadoop.hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
         }
       }
@@ -476,7 +475,8 @@ aws emr-containers start-job-run \
     "monitoringConfiguration": {
       "s3MonitoringConfiguration": {"logUri": "s3://'$S3BUCKET'/elasticmapreduce/emr-containers"}}}'
 ```
-In this case, we are connecting to the standalone HMS `thrift://hive-metastore:9083` that is running as a k8s pod in the namespace `emr`. 
+In the `spark-defaults` config, we use Glue catalog as the hive metastore for a serverless design, so the table can be queried in Athena. 
+Alternatively, we can replace the config by a standalone HMS setting `"spark.hive.metastore.uris": "thrift://hive-metastore:9083"` which is running as a k8s pod in the namespace `emr`. It is pointing to the Remote RDS hive metastore database created by this project.
 
 NOTE: to directly submit Hive scripts to EMR on EKS, replace the following 2 attributes in the job submission script:
  -  change from `sparkSubmitJobDriver` to `sparkSqlJobDriver` 
