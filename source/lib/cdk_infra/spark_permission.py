@@ -43,17 +43,6 @@ class AppSecConst(Construct):
             }
         )
 
-        #######################################
-        #######                         #######
-        #######   k8s Service Account   #######
-        #######                         #######
-        #######################################
-        _hive_sa = eks_cluster.add_service_account('HiveSA', 
-            name='hive', 
-            namespace=_emr_01_name
-        )
-        _hive_sa.node.add_dependency(emr_ns)
-
         ###########################################
         #######                             #######
         #######   k8s rbac for EMR on EKS   #######
@@ -69,17 +58,6 @@ class AppSecConst(Construct):
         )
         _emr_rb.node.add_dependency(emr_ns)
 
-        _hive_rb = KubernetesManifest(self,'HIVERoleBinding',
-            cluster=eks_cluster,
-            manifest=load_yaml_replace_var_local(source_dir+'/app_resources/hive-rbac.yaml', 
-            fields= {
-                "{{NAMESPACE}}": _emr_01_name,
-                "{{ServiceAccount}}": "hive"
-            }, 
-            multi_resource=True)
-        )
-        _hive_rb.node.add_dependency(_hive_sa)
-
         # Create EMR on EKS job executor role
         #######################################
         #######                         #######
@@ -94,7 +72,7 @@ class AppSecConst(Construct):
          
         sub_str_like = CfnJson(self, "ConditionJsonIssuer",
             value={
-                f"{_eks_oidc_issuer}:sub": f"system:serviceaccount:{_emr_01_name}:emr-containers-sa-*-*-{Aws.ACCOUNT_ID}-*"
+                f"{_eks_oidc_issuer}:sub": f"system:serviceaccount:{_emr_01_name}:*"
             }
         )
         self._emr_exec_role.assume_role_policy.add_statements(
@@ -132,7 +110,6 @@ class AppSecConst(Construct):
         )
         for statmnt in _emr_iam:
             self._emr_exec_role.add_to_policy(iam.PolicyStatement.from_json(statmnt))
-            _hive_sa.add_to_principal_policy(iam.PolicyStatement.from_json(statmnt))
 
         ############################################
         #######                              #######

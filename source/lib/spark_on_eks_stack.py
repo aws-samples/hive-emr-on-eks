@@ -47,7 +47,7 @@ class SparkOnEksStack(Stack):
         _network_sg = NetworkSgConst(self,'network-sg', eksname)
         _iam = IamConst(self,'iam_roles', eksname)
         self._eks_cluster = EksConst(self,'eks_cluster', eksname, _network_sg.vpc, _iam.managed_node_role, _iam.admin_role, _iam.emr_svc_role)
-        # OPTIONAL: comment out if you have an exiting Hive Metastore
+        # OPTIONAL: comment out if you have an exiting Hive Metastore DB
         self._rds_hms = RDS_HMS(self,'RDS', eksname, _network_sg.vpc)
         EksSAConst(self, 'eks_service_account', self._eks_cluster.my_cluster,self._rds_hms.secret)
         EksBaseAppConst(self, 'eks_base_app', self._eks_cluster.my_cluster)
@@ -65,15 +65,16 @@ class SparkOnEksStack(Stack):
         _hms_chart = self._eks_cluster.my_cluster.add_helm_chart('HMSChart',
             chart='hive-metastore',
             repository='https://melodyyangaws.github.io/hive-metastore-chart',
-            release='hive',
-            version='2.0.0',
+            release='hive-metastore',
+            version='3.0.0',
             create_namespace=False,
             namespace='emr',
             values=load_yaml_replace_var_local(source_dir+'/app_resources/hive-metastore-values.yaml',
                 fields={
                     "{{RDS_JDBC_URL}}": f"jdbc:mysql://{_rds_endpoint.socket_address}/{eksname}?createDatabaseIfNotExist=true",
                     "{{RDS_HOSTNAME}}": _rds_endpoint.hostname,
-                    "{{S3BUCKET}}": f"s3://{self._app_s3.code_bucket}"
+                    "{{S3BUCKET}}": f"s3://{self._app_s3.code_bucket}",
+                    "{{EMRExecRole}}": "{\"eks.amazonaws.com/role-arn\": \""+self._emr_sec.EMRExecRole+"\"}"
                 }
             )
         )

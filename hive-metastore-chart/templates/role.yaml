@@ -1,0 +1,60 @@
+{{- if .Values.rbac.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+ {{- include "hive-metastore.labels" $ | trim | nindent 4 }}
+  name: {{ include "hive-metastore.name" . }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - pods/exec
+      - configmaps
+      - services
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - batch
+      - extensions
+    resources:
+      - jobs
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete  
+  - apiGroups:
+      - ""
+    resources:
+      - events
+      - pods/log
+      - serviceaccounts
+      - secrets
+      - endpoints
+    resourceNames:
+      - cluster-autoscaler
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+    - ""
+    resources:
+    - persistentvolumeclaims
+    verbs:
+    - get
+    - list
+    - create
+    - delete
+{{- end }}

@@ -1,11 +1,15 @@
 replicaCount: 1
+rbac:
+  create: true
+  serviceAccount:
+    create: true
+    # allow HMS connects to AWS resources via IRSA, such as S3 and KMS.
+    annotations: {{EMRExecRole}}
 image:
   #replace it by your docker image name
   name: ghcr.io/melodyyangaws/hive-metastore
   tag: 3.0.0
   pullPolicy: IfNotPresent
-
-serviceAccountName: hive
 env:
 # enable s3a support
   HIVE_WAREHOUSE_S3LOCATION: {{S3BUCKET}}

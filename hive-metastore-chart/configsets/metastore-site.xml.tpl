@@ -33,7 +33,7 @@
           <name>hive.metastore.uris</name>
           <value>{{ $metastore_uris }}</value>
         </property>
-        {{- if not (index .Env  "HIVE_WAREHOUSE_DIR")  }}
+        {{- if not (index .Env  "")  }}
         <property>
           <name>hive.metastore.warehouse.dir</name>
           <value>file:///tmp/</value>

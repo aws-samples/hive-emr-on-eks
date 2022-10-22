@@ -1,14 +1,21 @@
 replicaCount: 1
+
+rbac:
+  create: true
+  serviceAccount:
+    create: true
+    # allow HMS connects to AWS resources via IRSA, such as S3 and KMS.
+    annotations: {}
+
 image:
   name: ghcr.io/melodyyangaws/hive-metastore
   tag: 3.0.0
   pullPolicy: IfNotPresent
-serviceAccountName: hive
 env:
   HIVE_DB_EXTERNAL: "true"
   HIVE_DB_DRIVER: com.mysql.cj.jdbc.Driver
   HIVE_CONF_PARAMS: "hive.metastore.schema.verification:false;datanucleus.autoCreateSchema:false"
-  HIVE_DB_JDBC_URL: {RDS_JDBC_URL}
+  HIVE_DB_JDBC_URL: "jdbc:mysql://hiveemroneks-rdsaurora6c66f7da-gs2cjmyb7axz.cluster-crrprbscd9rq.us-east-1.rds.amazonaws.com:3306/HiveEMRonEKS?createDatabaseIfNotExist=true"
   # either hardcoded here or get from Secrets Manager below
   HIVE_DB_USER: {RDS_USERNAME}
   HIVE_DB_PASS: {RDS_PASSWORD}

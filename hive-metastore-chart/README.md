@@ -12,7 +12,7 @@ helm version --short
 ### Install with Helm
 Replace placeholders in the [values file](values.yaml) as below. Alternatively, secure your Hive metastore credentials in AWS Secrets manager via this [CDK value file](https://github.com/aws-samples/hive-emr-on-eks/blob/main/source/app_resources/hive-metastore-values.yaml). 
 ```bash
-echo -e "\n Default HDFS: $S3BUCKET\n host: $HOST_NAME\n DB: $DB_NAME\n password: $PASSWORD\n username: $USER_NAME\n"
+echo -e "\n Default HDFS: $S3BUCKET\n Service Account IAM role: $EMR_ROLE_ARN\n host: $HOST_NAME\n DB: $DB_NAME\n password: $PASSWORD\n username: $USER_NAME\n"
 
 cd hive-metastore-chart
 
@@ -20,6 +20,7 @@ sed -i '' -e 's/{RDS_JDBC_URL}/"jdbc:mysql:\/\/'$HOST_NAME':3306\/'$DB_NAME'?cre
 sed -i '' -e 's/{RDS_USERNAME}/'$USER_NAME'/g' values.yaml 
 sed -i '' -e 's/{RDS_PASSWORD}/'$PASSWORD'/g' values.yaml
 sed -i '' -e 's/{S3BUCKET}/s3:\/\/'$S3BUCKET'/g' values.yaml
+sed -i '' -e 's/{}/{"eks.amazonaws.com/role-arn":'$EMR_ROLE_ARN'}/g' values.yaml
 ```
 
 ```bash

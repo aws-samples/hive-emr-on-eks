@@ -17,7 +17,7 @@ spec:
         {{- include "hive-metastore.labels" $ | trim | nindent 8 }}
         {{- include "hive-metastore.selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ .Values.serviceAccountName }}
+      serviceAccountName: {{ include "hive-metastore.name" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{.Values.image.name}}:{{ .Values.image.tag | default .Chart.AppVersion }}"
