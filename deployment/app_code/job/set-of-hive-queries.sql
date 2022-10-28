@@ -19,7 +19,7 @@ SELECT * FROM testtable WHERE key=238;
 CREATE TEMPORARY FUNCTION hiveUDF AS 'org.apache.hadoop.hive.ql.udf.generic.GenericUDTFExplode';
 SELECT `key`,`value`,hiveUDF(arrayCol) FROM testtable WHERE key=238;
 -- test4: CTAS table
-CREATE TABLE ctas_testtable IF NOT EXISTS
+CREATE TABLE IF NOT EXISTS ctas_testtable
 STORED AS ORC
 AS
 SELECT * FROM testtable;

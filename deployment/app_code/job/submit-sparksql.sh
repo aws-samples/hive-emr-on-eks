@@ -1,7 +1,7 @@
-# "spark.hadoop.hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
+# "spark.hive.metastore.uris": "thrift://hive-metastore:9083"
 aws emr-containers start-job-run \
   --virtual-cluster-id $VIRTUAL_CLUSTER_ID \
-  --name sparksql-test \
+  --name sparksql-wh-rds \
   --execution-role-arn $EMR_ROLE_ARN \
   --release-label emr-6.8.0-latest \
   --job-driver '{
@@ -13,7 +13,8 @@ aws emr-containers start-job-run \
       {
         "classification": "spark-defaults", 
         "properties": {
-          "spark.hive.metastore.uris": "thrift://hive-metastore:9083"
+          "spark.hadoop.hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory",
+          "spark.sql.warehouse.dir": "s3://'$S3BUCKET'/warehouse/"
         }
       }
     ], 
