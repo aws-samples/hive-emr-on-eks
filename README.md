@@ -441,11 +441,14 @@ We can run Hive SQL script with multiple lines using the Spark execution engine.
 See the full version of the sample [Hive sql script](deployment/app_code/job/set-of-hive-queries.sql).
 code snippet:
 ```bash
-CREATE DATABASE IF NOT EXISTS hiveonspark;
-UES hiveonspark;
-DROP TABLE IF EXISTS amazonreview;
-CREATE EXTERNAL TABLE IF NOT EXISTS amazonreview(.....) STORED AS PARQUET LOCATION 's3://${S3BUCKET}/app_code/data/toy/';
-SELECT count(*) FROM amazonreview;
+DROP DATABASE IF EXISTS hiveonspark CASCADE;
+CREATE DATABASE hiveonspark;
+USE hiveonspark;
+
+--create hive managed table
+CREATE TABLE IF NOT EXISTS testtable (`key` INT, `value` STRING) using hive;
+LOAD DATA LOCAL INPATH '/usr/lib/spark/examples/src/main/resources/kv1.txt' OVERWRITE INTO TABLE testtable;
+SELECT * FROM testtable WHERE key=238;
 ```
 Run the submission script:
 ```bash
@@ -468,6 +471,7 @@ aws emr-containers start-job-run \
       {
         "classification": "spark-defaults", 
         "properties": {
+          "spark.sql.warehouse.dir": "s3://'$S3BUCKET'/warehouse/",
           "spark.hadoop.hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
         }
       }
