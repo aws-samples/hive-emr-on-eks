@@ -25,8 +25,11 @@ sed -i '' -e 's/{}/{"eks.amazonaws.com/role-arn":'$EMR_ROLE_ARN'}/g' values.yaml
 
 ```bash
 helm repo add hive-metastore https://melodyyangaws.github.io/hive-metastore-chart
-helm install hive hive-metastore/hive-metastore -f values.yaml --namespace=emr --debug
+helm install hms hive-metastore/hive-metastore -f values.yaml --namespace=emr --debug
 ```
+NOTE: we assume the EKS namespace `emr` exists. Otherwise, helm install to your own namespace. The HMS shares an IAM execution role $EMR_ROLE_ARN with EMR on EKS in the same namespace. The recommendation is to create a seperate IAM role for the HMS service account, which is called [IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html). Ensure the new IAM Role's trust relationship allows the HMS service account assumes the role. See the example IAM trust policy [trust-relationship.json](https://docs.aws.amazon.com/eks/latest/userguide/associate-service-account-role.html)
+
+
 ### Security consideration
 Leveraging the k8s's [External Secrets Operator(ESO)](https://external-secrets.io/v0.4.4/guides-getting-started/) or the [k8s External Secrets](https://github.com/external-secrets/kubernetes-external-secrets) tool, we can automate the password retrieval process in order to connect to the Hive metastore database. 
 
