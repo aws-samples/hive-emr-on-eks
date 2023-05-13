@@ -80,14 +80,14 @@ class SparkOnEksStack(Stack):
         )
         _hms_chart.node.add_dependency(self._emr_sec)
 
-        # get HMS credential from secrets manager
-        _config_hms = eks.KubernetesManifest(self,'HMSConfig',
-            cluster=self._eks_cluster.my_cluster,
-            manifest=load_yaml_replace_var_local(source_dir+'/app_resources/hive-metastore-config.yaml', 
-                fields= {
-                    "{SECRET_MANAGER_NAME}": self._rds_hms.secret.secret_name
-                },
-                multi_resource=True
-            )
-        )
-        _config_hms.node.add_dependency(_hms_chart)
+        # # get HMS credential from secrets manager
+        # _config_hms = eks.KubernetesManifest(self,'HMSConfig',
+        #     cluster=self._eks_cluster.my_cluster,
+        #     manifest=load_yaml_replace_var_local(source_dir+'/app_resources/hive-metastore-config.yaml', 
+        #         fields= {
+        #             "{SECRET_MANAGER_NAME}": self._rds_hms.secret.secret_name
+        #         },
+        #         multi_resource=True
+        #     )
+        # )
+        # _config_hms.node.add_dependency(_hms_chart)

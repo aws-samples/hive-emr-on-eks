@@ -2,7 +2,7 @@
   "app": "python3 app.py",
   "context": {
     "project_name": "HiveEMRonEKS",
-    "emr_version":"emr-6.3.0",
+    "emr_version":"emr-6.10.0",
     "version": "v2.0.0",
     "@aws-cdk/core:stackRelativeExports": "false"
   }

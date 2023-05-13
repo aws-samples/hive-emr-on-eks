@@ -22,7 +22,7 @@ class RDS_HMS(Construct):
             ),
             instance_props={
                 "vpc_subnets":{
-                    "subnet_type": ec2.SubnetType.PRIVATE_WITH_NAT
+                    "subnet_type": ec2.SubnetType.PRIVATE_WITH_EGRESS
                 },
                 "vpc": eksvpc
             },

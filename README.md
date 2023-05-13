@@ -38,8 +38,8 @@ The infrastructure deployment includes the following:
 
 The provisioning takes about 30 minutes to complete. 
 Two ways to deploy:
-1. AWS CloudFormation template (CFN) 
-2. [AWS Cloud Development Kit (AWS CDK)](https://docs.aws.amazon.com/cdk/latest/guide/home.html).
+1. [AWS CloudFormation template (CFN)](#-cloudformation-deployment)
+2. [AWS Cloud Development Kit (AWS CDK)](#-cdk-deployment)
 
 ### Prerequisites 
 Install the folowing tools:
