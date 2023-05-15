@@ -42,6 +42,8 @@ Two ways to deploy:
 2. [AWS Cloud Development Kit (AWS CDK)](#-cdk-deployment)
 
 ### Prerequisites 
+HMS helm chart requires k8s >= 1.23, ie. EKS version must be 1.23+.
+
 Install the folowing tools:
 1. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html). Configure the CLI by `aws configure`.
 2. [kubectl & jq](https://www.eksworkshop.com/020_prerequisites/k8stools/)
@@ -61,7 +63,7 @@ Can use [AWS CloudShell](https://console.aws.amazon.com/cloudshell) that has inc
 You can customize the solution, for example deploy to a different AWS region: 
 ```bash
 export BUCKET_NAME_PREFIX=<my-bucket-name> # bucket where customized code will reside
-export AWS_REGION=<your-region>
+export e=<your-region>
 export SOLUTION_NAME=hive-emr-on-eks
 export VERSION=v2.0.0 # version number for the customized code
 

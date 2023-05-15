@@ -66,7 +66,7 @@ class SparkOnEksStack(Stack):
             chart='hive-metastore',
             repository='https://melodyyangaws.github.io/hive-metastore-chart',
             release='hive-metastore',
-            version='3.0.0',
+            version='4.0.0',
             create_namespace=False,
             namespace='emr',
             values=load_yaml_replace_var_local(source_dir+'/app_resources/hive-metastore-values.yaml',
