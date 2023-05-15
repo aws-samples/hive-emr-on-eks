@@ -42,7 +42,7 @@ Two ways to deploy:
 2. [AWS Cloud Development Kit (AWS CDK)](#-cdk-deployment)
 
 ### Prerequisites 
-HMS helm chart requires k8s >= 1.23, ie. EKS version must be 1.23+.
+`NOTE: HMS helm chart requires k8s >= 1.23, ie. EKS version must be 1.23+.`
 
 Install the folowing tools:
 1. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html). Configure the CLI by `aws configure`.
