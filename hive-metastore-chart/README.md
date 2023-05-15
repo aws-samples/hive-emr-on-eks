@@ -1,4 +1,5 @@
 # HMS (Hive Metastore Service) Helm Chart 
+`NOTE: Kubernetes version must >= 1.23`
 
 Beginning in Hive 3.0, Hive Metastore can be run without the rest of Hive being installed. This decoupling provides us a way to implement the Metastore service as a stateless microservice in Kubernetes infrastructure. This Helm chart (package) encapsulates all configurations and components needed to deploy a HNS, and helps us to easily install a HMS as a scalable and secure k8s application. 
 
