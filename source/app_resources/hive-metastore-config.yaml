@@ -53,7 +53,7 @@ data:
 
     function terminate_main_process() {
       echo "terminating the HMS process.."
-      kill -9 $(ps aux | grep HiveMetaStore | grep -v grep | awk '{print $2}')
+      kill $(ps aux | grep HiveMetaStore | grep -v grep | awk '{print $2}')
     }
 
     # Waiting for the first heartbeat sent by Spark main container
