@@ -9,25 +9,25 @@ sudo yum install openssl && curl -sSL https://raw.githubusercontent.com/helm/hel
 helm version --short
 ```
 ## How to use it
-### Install with Helm
+### Install with Helm (must be)
 Replace placeholders in the [values file](values.yaml) as below. Alternatively, secure your Hive metastore credentials in AWS Secrets manager via this [CDK value file](https://github.com/aws-samples/hive-emr-on-eks/blob/main/source/app_resources/hive-metastore-values.yaml). 
 ```bash
 echo -e "\n Default HDFS: $S3BUCKET\n Service Account IAM role: $EMR_ROLE_ARN\n host: $HOST_NAME\n DB: $DB_NAME\n password: $PASSWORD\n username: $USER_NAME\n"
 
 cd hive-metastore-chart
 
-sed -i '' -e 's/{RDS_JDBC_URL}/"jdbc:mysql:\/\/'$HOST_NAME':3306\/'$DB_NAME'?createDatabaseIfNotExist=true"/g' values.yaml 
-sed -i '' -e 's/{RDS_USERNAME}/'$USER_NAME'/g' values.yaml 
-sed -i '' -e 's/{RDS_PASSWORD}/'$PASSWORD'/g' values.yaml
-sed -i '' -e 's/{S3BUCKET}/s3:\/\/'$S3BUCKET'/g' values.yaml
-sed -i '' -e 's/{EMRExecRole}/{"eks.amazonaws.com/role-arn":'$EMR_ROLE_ARN'}/g' values.yaml
+sed -i '' -e 's|{RDS_JDBC_URL}|"jdbc:mysql://'$HOST_NAME':3306/'$DB_NAME'?createDatabaseIfNotExist=true"|g' values.yaml 
+sed -i '' -e 's|{RDS_USERNAME}|"'$USER_NAME'"|g' values.yaml 
+sed -i '' -e 's|{RDS_PASSWORD}|"'$PASSWORD'"|g' values.yaml
+sed -i '' -e 's|{S3BUCKET}|"s3://'$S3BUCKET'"|g' values.yaml
+sed -i '' -e 's|{EMRExecRole}|{"eks.amazonaws.com/role-arn": "'$EMR_ROLE_ARN'"}|g' values.yaml
 ```
 
 ```bash
 helm repo add hive-metastore https://melodyyangaws.github.io/hive-metastore-chart
 helm install hms hive-metastore/hive-metastore -f values.yaml --namespace=emr --debug
 ```
-NOTE: we assume the EKS namespace `emr` exists. Otherwise, helm install to your own namespace. The HMS shares an IAM execution role $EMR_ROLE_ARN with EMR on EKS in the same namespace. The recommendation is to create a seperate IAM role for the HMS service account, which is called [IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html). Ensure the new IAM Role's trust relationship allows the HMS service account assumes the role. See the example IAM trust policy [trust-relationship.json](https://docs.aws.amazon.com/eks/latest/userguide/associate-service-account-role.html)
+NOTE: we assume the EKS namespace `emr` exists registered to an EMR on EKS's virtual cluster. The HMS must be in the same namespace as registered EMR on EKS namespace, beause the HMS shares an IAM execution role $EMR_ROLE_ARN with EMR on EKS in the same SA of the namespace. The recommendation is to create a seperate IAM role for the HMS service account, which is called [IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html). Ensure the new IAM Role's trust relationship allows the HMS service account assumes the role. See the example IAM trust policy [trust-relationship.json](https://docs.aws.amazon.com/eks/latest/userguide/associate-service-account-role.html)
 
 
 ### Security consideration
