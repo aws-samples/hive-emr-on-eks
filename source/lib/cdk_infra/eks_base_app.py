@@ -78,7 +78,7 @@ class EksBaseAppConst(Construct):
         #     lifecycle_policy=efs.LifecyclePolicy.AFTER_7_DAYS,
         #     performance_mode=efs.PerformanceMode.MAX_IO,
         #     removal_policy=RemovalPolicy.DESTROY,
-        #     vpc_subnets=SubnetSelection(subnet_type=SubnetType.PRIVATE_WITH_NAT, one_per_az=True)
+        #     vpc_subnets=SubnetSelection(subnet_type=SubnetType.PRIVATE_WITH_EGRESS, one_per_az=True)
         # )
         # _pv= KubernetesManifest(self,'pvClaim',
         #     cluster=eks_cluster,

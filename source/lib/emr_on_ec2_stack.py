@@ -60,7 +60,7 @@ class EMREC2Stack(NestedStack):
         svc_role.add_to_policy(iam.PolicyStatement(
                 effect=iam.Effect.ALLOW,
                 resources=["*"],
-                actions=["ec2:RunInstances"])
+                actions=["ec2:RunInstances","ec2:CreateSecurityGroup","ec2:CreateNetworkInterface"])
         )
 
         # emr job flow profile

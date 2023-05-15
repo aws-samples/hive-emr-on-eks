@@ -20,7 +20,7 @@ sed -i '' -e 's/{RDS_JDBC_URL}/"jdbc:mysql:\/\/'$HOST_NAME':3306\/'$DB_NAME'?cre
 sed -i '' -e 's/{RDS_USERNAME}/'$USER_NAME'/g' values.yaml 
 sed -i '' -e 's/{RDS_PASSWORD}/'$PASSWORD'/g' values.yaml
 sed -i '' -e 's/{S3BUCKET}/s3:\/\/'$S3BUCKET'/g' values.yaml
-sed -i '' -e 's/{}/{"eks.amazonaws.com/role-arn":'$EMR_ROLE_ARN'}/g' values.yaml
+sed -i '' -e 's/{EMRExecRole}/{"eks.amazonaws.com/role-arn":'$EMR_ROLE_ARN'}/g' values.yaml
 ```
 
 ```bash

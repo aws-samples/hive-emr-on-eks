@@ -1,6 +1,7 @@
 # image:
 #   tag: v1beta2-1.2.3-3.1.1
 serviceAccounts:
+  # create IRSA for Spark app on our own, don't create Spark SA here.
   spark:
     create: false
   sparkoperator:
@@ -10,4 +11,3 @@ metrics:
   enable: false
 webhook:
   enable: true
-  port: 443

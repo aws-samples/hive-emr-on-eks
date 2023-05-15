@@ -11,11 +11,11 @@ emr_release_v=app.node.try_get_context('emr_version')
 # main stacks
 eks_stack = SparkOnEksStack(app, 'HiveEMRonEKS', proj_name)
 # need for initializing the schematool-initSchema
-# hive_emr_ec2_stack = EMREC2Stack(eks_stack, 'EMRonEC2', emr_release_v, eks_stack.eks_cluster,eks_stack.code_bucket,eks_stack.rds_secret)
+hive_emr_ec2_stack = EMREC2Stack(eks_stack, 'EMRonEC2', emr_release_v, eks_stack.eks_cluster,eks_stack.code_bucket,eks_stack.rds_secret)
 
 
 Tags.of(eks_stack).add('project', proj_name)
-# Tags.of(hive_emr_ec2_stack).add('project', proj_name)
+Tags.of(hive_emr_ec2_stack).add('project', proj_name)
 
 # Deployment Output
 CfnOutput(eks_stack,'CODE_BUCKET', value=eks_stack.code_bucket)
