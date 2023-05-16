@@ -53,9 +53,9 @@ data:
 
     function terminate_main_process() {
       echo "terminating the HMS process.."
-      kill $(ps aux | grep HiveMetaStore | grep -v grep | awk '{print $2}')
+      pid=$(ps aux | grep HiveMetaStore | grep -v grep | awk '{print $2}')
+      kill -15 $pid
     }
-
     # Waiting for the first heartbeat sent by Spark main container
     echo "Waiting for file $FILE_TO_WATCH to appear..."
     start_wait=$(date +%s)

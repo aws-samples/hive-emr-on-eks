@@ -26,6 +26,7 @@ sed -i '' -e 's|{EMRExecRole}|{"eks.amazonaws.com/role-arn": "'$EMR_ROLE_ARN'"}|
 
 ```bash
 helm repo add hive-metastore https://melodyyangaws.github.io/hive-metastore-chart
+helm repo update hive-metastore
 helm install hms hive-metastore/hive-metastore -f values.yaml --namespace=emr --debug
 ```
 NOTE: we assume the EKS namespace `emr` exists registered to an EMR on EKS's virtual cluster. The HMS must be in the same namespace as registered EMR on EKS namespace, beause the HMS shares an IAM execution role $EMR_ROLE_ARN with EMR on EKS in the same SA of the namespace. The recommendation is to create a seperate IAM role for the HMS service account, which is called [IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html). Ensure the new IAM Role's trust relationship allows the HMS service account assumes the role. See the example IAM trust policy [trust-relationship.json](https://docs.aws.amazon.com/eks/latest/userguide/associate-service-account-role.html)
