@@ -63,7 +63,7 @@ Can use [AWS CloudShell](https://console.aws.amazon.com/cloudshell) that has inc
 You can customize the solution, for example deploy to a different AWS region: 
 ```bash
 export BUCKET_NAME_PREFIX=<my-bucket-name> # bucket where customized code will reside
-export e=<your-region>
+export AWS_REGION=<your-region>
 export SOLUTION_NAME=hive-emr-on-eks
 export VERSION=v2.0.0 # version number for the customized code
 
