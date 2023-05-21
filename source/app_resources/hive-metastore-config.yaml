@@ -48,13 +48,13 @@ data:
     # FILE_TO_WATCH="/var/log/fluentd/main-container-terminated"
     FILE_TO_WATCH=$1
     INITIAL_HEARTBEAT_TIMEOUT_THREASHOLD=60
-    HEARBEAT_TIMEOUT_THRESHOLD=15
+    HEARBEAT_TIMEOUT_THRESHOLD=16
     SLEEP_DURATION=10
 
     function terminate_main_process() {
       echo "terminating the HMS process.."
       pid=$(ps aux | grep HiveMetaStore | grep -v grep | awk '{print $2}')
-      kill -15 $pid
+      kill -SIGTERM $pid
     }
     # Waiting for the first heartbeat sent by Spark main container
     echo "Waiting for file $FILE_TO_WATCH to appear..."

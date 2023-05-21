@@ -17,11 +17,7 @@ spec:
       requests:
         memory: "500Mi"
         cpu: "400m"
-    command: ["sh", "-c", "/bin/self-terminate.sh /var/log/fluentd/main-container-terminated & /opt/hive-metastore/bin/entrypoint.sh"]
-    lifecycle:
-      preStart:
-        exec:
-          command: ["sh", "-c", ""]
+    command: ["sh", "-c", "/opt/hive-metastore/bin/entrypoint.sh & /bin/self-terminate.sh /var/log/fluentd/main-container-terminated"]
     env:
     - name: HIVE_DB_DRIVER
       value: com.mysql.cj.jdbc.Driver
