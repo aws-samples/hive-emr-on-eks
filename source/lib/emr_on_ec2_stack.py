@@ -57,28 +57,31 @@ class EMREC2Stack(NestedStack):
                 resources=[emr_job_role.role_arn],
                 conditions={"StringEquals": {"iam:PassedToService": "ec2.amazonaws.com"}})
         )
-        svc_role.add_to_policy(iam.PolicyStatement(
-                effect=iam.Effect.ALLOW,
-                resources=["*"],
-                actions=["ec2:RunInstances","ec2:CreateSecurityGroup","ec2:CreateNetworkInterface"])
-        )
+        # added tag to required Master node SG, so we don't need this anymore
+        # svc_role.add_to_policy(iam.PolicyStatement(
+        #         effect=iam.Effect.ALLOW,
+        #         resources=["*"],
+        #         actions=["ec2:RunInstances","ec2:CreateSecurityGroup","ec2:CreateNetworkInterface"])
+        # )
 
         # emr job flow profile
         emr_job_flow_profile = iam.CfnInstanceProfile(self,"EMRJobflowProfile",
             roles=[emr_job_role.role_name],
             instance_profile_name=emr_job_role.role_name
         )
-        ####################################
-        #######                      #######
-        #######  EMR Master Node SG  #######
-        #######                      #######
-        ####################################
+        ###############################################
+        #######                                 #######
+        #######  EMR Master Node Additional SG  #######
+        #######                                 #######
+        ###############################################
         self._thrift_sg = ec2.SecurityGroup(self,'thrift',
             security_group_name=eks_cluster.cluster_name + '-thrift-sg',
             vpc=eks_cluster.vpc,
             description='Hive thrift server incoming'
         )
         self._thrift_sg.add_ingress_rule(ec2.Peer.ipv4(eks_cluster.vpc.vpc_cidr_block),ec2.Port.tcp(port=9083), "connect to hive thrift from EKS")
+        # The additional SG requires a tag to allow EMR to run EC2 instances
+        Tags.of(self._thrift_sg).add("for-use-with-amazon-emr-managed-policies", "true")   
 
         ####################################
         #######                      #######
