@@ -114,6 +114,7 @@ docker push $DOCKERHUB_USERNAME/hive-metastore:3.0.0
 ```
 
 3. Copy sample data to your S3 bucket:
+**NOTE**: amazon-reviews-pds is not a public dataset anymore. Either skip this step or copy your own review data or use other public dataset you know of.
 ```bash
 aws s3 cp s3://amazon-reviews-pds/parquet/product_category=Toys/ s3://$S3BUCKET/app_code/data/toy --recursive
 ```
