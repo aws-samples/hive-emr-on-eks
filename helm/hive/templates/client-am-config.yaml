@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.name.amConfigMap }}
+data:
+  key: {{ .Values.amConfig.key | default uuidv4 | quote }}
+  timestamp: {{ .Values.amConfig.timestamp | default (randNumeric 8) | quote }}
+  mr3sessionid: {{ .Values.amConfig.mr3SessionId | default uuidv4 | quote }}
+  ats-secret-key: {{ .Values.amConfig.atsSecretKey | default uuidv4 | quote }}

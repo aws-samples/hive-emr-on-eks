@@ -1,0 +1,166 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: hivemr3
+  name: hivemr3-timeline
+spec:
+  serviceName: timeline
+  replicas: 1
+  selector:
+    matchLabels:
+      hivemr3_hive_source: hivesrc3
+      hivemr3_app: timeline
+  template:
+    metadata:
+      namespace: hivemr3
+      name: hivemr3-timeline
+      labels:
+        hivemr3_hive_source: hivesrc3
+        hivemr3_app: timeline
+        mr3-pod-role: master-role
+    spec:
+      restartPolicy: Always
+      hostAliases:
+      - ip: "1.1.1.1"
+        hostnames:
+        - "red0"
+      affinity:
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  hivemr3_app: metastore
+      imagePullSecrets: []
+      containers:
+      - image: mr3project/mr3ui:1.5
+        command:
+        - /opt/mr3-run/ats/timeline-service.sh
+        imagePullPolicy: Always
+        name: timelineserver-http
+        env:
+        - name: ATS_SECRET_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: client-timeline-config
+              key: ats-secret-key
+        resources:
+          requests:
+            cpu: 0.25
+            memory: 1024Mi
+          limits:
+            cpu: 0.25
+            memory: 1024Mi
+        ports:
+        - containerPort: 9190
+          protocol: TCP
+        - containerPort: 9188
+          protocol: TCP
+        livenessProbe:
+          tcpSocket:
+            port: 9188
+          initialDelaySeconds: 120
+          periodSeconds: 120
+        volumeMounts:
+        - name: conf-k8s-volume
+          mountPath: /opt/mr3-run/ats/conf
+          readOnly: true
+        - name: key-k8s-volume
+          mountPath: /opt/mr3-run/ats/key
+          readOnly: true
+        - name: env-secret-k8s-volume
+          mountPath: /opt/mr3-run/ats/env.sh
+          subPath: env.sh
+        - name: timeline-work-dir-volume
+          mountPath: /opt/mr3-run/ats/work-dir
+      - image: mr3project/mr3ui:1.5
+        command:
+        - /opt/mr3-run/ats/mr3-ui.sh
+        imagePullPolicy: Always
+        name: mr3-ui-jetty
+        resources:
+          requests:
+            cpu: 0.25
+            memory: 512Mi
+          limits:
+            cpu: 0.25
+            memory: 512Mi
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 120
+        volumeMounts:
+        - name: conf-k8s-volume
+          mountPath: /opt/mr3-run/ats/conf
+          readOnly: true
+      - image: mr3project/mr3ui:1.5
+        command:
+        - /opt/mr3-run/ats/prometheus.sh
+        imagePullPolicy: Always
+        name: prometheus
+        resources:
+          requests:
+            cpu: 1.25
+            memory: 4096Mi
+          limits:
+            cpu: 1.25
+            memory: 4096Mi
+        ports:
+        - containerPort: 9090
+          protocol: TCP
+        livenessProbe:
+          tcpSocket:
+            port: 9090
+          initialDelaySeconds: 120
+          periodSeconds: 120
+        volumeMounts:
+        - name: conf-k8s-volume
+          mountPath: /opt/mr3-run/ats/conf
+          readOnly: true
+        - name: timeline-work-dir-volume
+          mountPath: /opt/mr3-run/ats/prometheus/data
+      - image: mr3project/mr3ui:1.5
+        command:
+        - /opt/mr3-run/ats/grafana.sh
+        imagePullPolicy: Always
+        name: grafana
+        resources:
+          requests:
+            cpu: 0.25
+            memory: 512Mi
+          limits:
+            cpu: 0.25
+            memory: 512Mi
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        livenessProbe:
+          tcpSocket:
+            port: 3000
+          initialDelaySeconds: 120
+          periodSeconds: 120
+        volumeMounts:
+        - name: conf-k8s-volume
+          mountPath: /opt/mr3-run/ats/conf
+          readOnly: true
+        - name: timeline-work-dir-volume
+          mountPath: /opt/mr3-run/ats/grafana/data
+      volumes:
+      - name: conf-k8s-volume
+        configMap:
+          name: hivemr3-timeline-conf-configmap
+      - name: key-k8s-volume
+        secret:
+          secretName: hivemr3-timeline-secret
+      - name: env-secret-k8s-volume
+        secret:
+          secretName: env-secret
+      - name: timeline-work-dir-volume
+        persistentVolumeClaim:
+          claimName: workdir-pvc-timeline

@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  #namespace: hivemr3
+  name: {{ .Values.name.hive.hiveserver2 }}
+spec:
+  replicas: {{ .Values.hive.replicas }}
+  selector:
+    matchLabels:
+      hivemr3_hive_source: hivesrc3
+      hivemr3_app: hiveserver2
+  template:
+    metadata:
+      #namespace: hivemr3
+      name: {{ .Values.name.hive.hiveserver2 }}
+      labels:
+        hivemr3_hive_source: hivesrc3
+        hivemr3_app: hiveserver2
+        mr3-pod-role: master-role
+    spec:
+      serviceAccountName: {{ .Values.name.hive.serviceAccount }}
+      restartPolicy: Always
+      hostAliases:
+      {{- range .Values.hostAliases }}
+      - ip: {{ .ip }}
+        hostnames: 
+        {{- range .hostnames }}
+        - {{ . }}
+        {{- end }}
+      {{- end }}
+      affinity:
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  hivemr3_app: metastore
+      {{- if .Values.docker.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.docker.imagePullSecrets }}
+      {{- end }}
+      containers:
+      - image: {{ .Values.docker.image }}
+        command: ["{{ .Values.dir.work }}/hiveserver2-service.sh"]
+        args: ["start", "--{{ .Values.hive.amMode }}"]
+        imagePullPolicy: {{ .Values.docker.imagePullPolicy }}
+        name: hiveserver2
+        env:
+        - name: CLIENT_TO_AM_TOKEN_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.name.amConfigMap }}
+              key: key
+        - name: MR3_APPLICATION_ID_TIMESTAMP
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.name.amConfigMap }}
+              key: timestamp
+        - name: MR3_SHARED_SESSION_ID
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.name.amConfigMap }}
+              key: mr3sessionid
+        - name: ATS_SECRET_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Values.name.amConfigMap }}
+              key: ats-secret-key
+        resources:
+          requests:
+            cpu: {{ .Values.hive.resources.requests.cpu }}
+            memory: {{ .Values.hive.resources.requests.memory }}
+          limits:
+            cpu: {{ .Values.hive.resources.limits.cpu }}
+            memory: {{ .Values.hive.resources.limits.memory }}
+        ports:
+        - containerPort: {{ .Values.hive.port }}
+          protocol: TCP
+        - containerPort: {{ .Values.hive.httpport }}
+          protocol: TCP
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.hive.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.hive.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        volumeMounts:
+        - name: env-k8s-volume
+          mountPath: {{ .Values.dir.base }}/env.sh
+          subPath: env.sh
+        - name: env-secret-k8s-volume
+          mountPath: {{ .Values.dir.base }}/env-secret.sh
+          subPath: env-secret.sh
+        - name: conf-k8s-volume
+          mountPath: {{ .Values.dir.conf }}
+          readOnly: true
+        - name: key-k8s-volume
+          mountPath: {{ .Values.dir.keytab }}
+          readOnly: true
+        - name: am-local-k8s-volume
+          mountPath: {{ .Values.dir.base }}/am-local-dir
+        {{- if .Values.workDir.create }}
+        - name: work-dir-volume
+          mountPath: {{ .Values.dir.persistentVolumeClaim }}
+        {{- end }}
+        - name: hiveserver2-ranger-policy-k8s-volume
+          mountPath: {{ .Values.dir.base }}/hiveserver2-ranger-policycache
+      volumes:
+      - name: env-k8s-volume
+        configMap:
+          name: {{ .Values.name.envConfigMap }}
+      - name: env-secret-k8s-volume
+        secret:
+          secretName: {{ .Values.name.envSecret }}
+      - name: conf-k8s-volume
+        configMap:
+          name: {{ .Values.name.hive.configMap }}
+      - name: key-k8s-volume
+        secret:
+          secretName: {{ .Values.name.hive.secret }}
+      - name: am-local-k8s-volume
+        emptyDir: {} 
+      {{- if .Values.workDir.create }}
+      - name: work-dir-volume
+        persistentVolumeClaim:
+          claimName: {{ .Values.name.persistentVolumeClaim }}
+      {{- end }}
+      - name: hiveserver2-ranger-policy-k8s-volume
+        emptyDir: {}

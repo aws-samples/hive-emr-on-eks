@@ -1,0 +1,148 @@
+dir:
+  base: "/opt/mr3-run"
+  work: "/opt/mr3-run/hive"
+  conf: "/opt/mr3-run/conf"
+  keytab: "/opt/mr3-run/key"
+  persistentVolumeClaim: "/opt/mr3-run/work-dir"
+
+name:
+  hive:
+    hiveserver2: hivemr3-hiveserver2
+    service: hiveserver2
+    serviceAccount: hive-service-account
+    configMap: hivemr3-conf-configmap
+    secret: hivemr3-keytab-secret
+    workerSecret: hivemr3-worker-secret
+  mr3:
+    masterServiceAccount: master-service-account
+    workerServiceAccount: worker-service-account
+  metastore:
+    service: metastore
+  envConfigMap: env-configmap
+  envSecret: env-secret
+  amConfigMap: client-am-config
+  persistentVolume: workdir-pv
+  persistentVolumeClaim: workdir-pvc
+
+docker:
+  image: mr3project/hive3:1.10
+  containerWorkerImage: mr3project/hive3:1.10
+  # do not use a composite name like hive@RED, hive/red0@RED
+  user: hive
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets: 
+
+create:
+  # specifies whether or not to create metastore service inside k8s
+  metastore: true
+  # specifies whether or not to create ServiceAccounts (hive-service-account, master-service-account, worker-service-account)
+  serviceAccount: true
+
+metastore:
+  # if create.metastore == true, this field will be ignored and 
+  # replaced with hivemr3-metastore-0.metastore.{{namespace}}.svc.cluster.local
+  host: red0
+  port: 9850
+
+  databaseHost: mysql.hivemr3.svc.cluster.local
+  databaseName: hive5mr3
+  # argument to schemaTool (not for hive.metastore.db.type in hive-site.xml)
+  dbType: mysql
+
+  warehouseDir: s3a://your-warehouse-dir/warehouse
+
+  initSchema: true
+  mountLib: true
+  hostLib: false
+  hostLibDir: "/home/ec2-user/lib"
+
+  secureMode: false
+  kerberosPrincipal: hive/red0@RED
+  # keytab file under dir.keytab
+  kerberosKeytab: "hive.service.keytab"
+  
+  resources:
+    requests:
+      cpu: 1
+      memory: 8Gi
+    limits:
+      cpu: 1
+      memory: 8Gi
+  heapSize: 8192
+
+hive:
+  port: 9852
+  httpport: 10001
+  externalIp: 1.1.1.1
+  replicas: 1
+  # amMode options: kubernetes, localthread, and localprocess
+  amMode: kubernetes
+
+  # specifies whether or not to create a Secret from dir.keytab/*
+  createSecret: false
+  # authentication options: NONE (uses plain SASL), NOSASL, KERBEROS, LDAP, PAM, and CUSTOM
+  authentication: NONE
+  kerberosPrincipal: hive/red0@RED
+  # keytab file under dir.keytab
+  kerberosKeytab: "hive.service.keytab"
+  # specifies whether Hive token renewal is enabled inside DAGAppMaster and ContainerWorkers 
+  tokenRenewalEnabled: false
+
+  # Truststore for HiveServer2
+  # file name under dir.keytab
+  sslTruststore: hivemr3-ssl-certificate.jks
+  sslTruststoreType: jks
+
+  resources:
+    requests:
+      cpu: 1
+      memory: 8Gi
+    limits:
+      cpu: 1
+      memory: 8Gi
+  heapSize: 8192
+
+# for reading from secure HDFS
+hdfs:
+  userPrincipal: hive@RED
+  # file name under dir.keytab
+  userKeytab: "hive.keytab"
+  tokenRenewalEnabled: false
+
+# if not set, random values will be generated
+amConfig:
+  key:
+  timestamp:
+  mr3SessionId:
+  atsSecretKey:
+
+workDir:
+  # if false, the user should manually create PersistentVolumeClaim of the same name specified by the 
+  # field name.persistentVolume, and PersistentVolume if necessary
+  create: true
+
+  isNfs: false
+  nfs:
+    server: "1.1.1.1"
+    path: "/work/nfs/hive"
+  volumeSize: 10Gi
+  volumeClaimSize: 10Gi
+  storageClassName: ""
+  # if isNfs == false, configure a volume like below.
+  # volumeStr should be indented properly with a double space (or multiple double spaces) after '\n'.
+  #   ex. okay  -> volumeStr: "hostPath:\n  path: /work/nfs/mr3-run-work-dir"
+  #   ex. wrong -> volumeStr: "hostPath:\n path: /work/nfs/mr3-run-work-dir"
+  volumeStr: "hostPath:\n  path: /data1/hive/workdir"
+
+prometheus:
+  create: false
+  port: 9890
+  externalIp: 1.1.1.1
+
+logLevel: INFO
+
+hostAliases:
+- ip: "1.1.1.1"
+  hostnames:
+  - "red0"
+

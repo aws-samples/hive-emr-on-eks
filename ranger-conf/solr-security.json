@@ -1,0 +1,26 @@
+{
+  "authentication": {
+    "class": "org.apache.solr.security.KerberosPlugin"
+  },
+  "authorization": {
+    "class": "solr.RuleBasedAuthorizationPlugin",
+    "permissions": [
+      {
+        "name": "update",
+        "role": "updater"
+      },
+      {
+        "name": "read",
+        "role": "reader"
+      },
+      {
+        "name": "*",
+        "role": "admin"
+      }
+    ],
+    "user-role": {
+      "hive/red0@RED": "updater",
+      "rangeradmin/red0@RED": "reader",
+    }
+  }
+}

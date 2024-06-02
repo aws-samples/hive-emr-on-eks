@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  #namespace: hivemr3
+  name: {{ .Values.name.hive.service }}
+spec:
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: {{ .Values.hive.port }}
+    targetPort: {{ .Values.hive.port }}
+    name: thrift
+  - protocol: TCP
+    port: {{ .Values.hive.httpport }}
+    targetPort: {{ .Values.hive.httpport }}
+    name: http
+  selector:
+    hivemr3_app: hiveserver2
+  externalIPs:
+  - {{ .Values.hive.externalIp }}

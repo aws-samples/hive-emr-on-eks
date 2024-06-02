@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.name.envConfigMap }}
+data:
+  {{- (tpl (.Files.Glob "env.sh").AsConfig .) | nindent 2 }}

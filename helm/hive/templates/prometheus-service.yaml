@@ -1,0 +1,17 @@
+{{ if .Values.prometheus.create -}}
+apiVersion: v1
+kind: Service
+metadata:
+  #namespace: hivemr3
+  name: prometheus
+spec:
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: {{ .Values.prometheus.port }} 
+    targetPort: 9890
+  selector:
+    hivemr3_aux: prometheus
+  externalIPs:
+  - {{ .Values.prometheus.externalIp }}
+{{ end }}

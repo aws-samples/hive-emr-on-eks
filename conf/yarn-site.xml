@@ -1,0 +1,34 @@
+<configuration>
+
+<property>
+  <name>yarn.resourcemanager.principal</name>
+  <value>rm/red0@RED</value>
+</property>
+
+<property>
+  <name>yarn.timeline-service.enabled</name>
+  <value>false</value>
+</property>
+
+<property>
+  <name>yarn.timeline-service.version</name>
+  <value>1.0f</value>
+</property>
+
+<property>
+  <name>yarn.http.policy</name>
+  <value>HTTP_ONLY</value>
+</property>
+
+<property>
+  <name>yarn.timeline-service.webapp.address</name>
+  <value>timeline.hivemr3.svc.cluster.local:9188</value>
+</property>
+
+<property>
+  <name>yarn.timeline-service.webapp.https.address</name>
+  <value>timeline.hivemr3.svc.cluster.local:9190</value>
+</property>
+
+</configuration>
+

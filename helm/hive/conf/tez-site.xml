@@ -1,0 +1,303 @@
+<configuration>
+
+<property>
+  <name>tez.counters.max</name>
+  <value>10000</value>
+</property>
+
+<property>
+  <name>tez.counters.max.groups</name>
+  <value>3000</value>
+</property>
+
+<property>
+  <name>tez.grouping.max-size</name>
+  <value>1073741824</value>
+</property>
+ 
+<property>
+  <name>tez.grouping.min-size</name>
+  <value>16777216</value>
+</property>
+ 
+<property>
+  <name>tez.grouping.split-waves</name>
+  <value>1.7</value>
+</property>
+ 
+<property>
+  <name>tez.runtime.compress</name>
+  <value>true</value>
+</property>
+ 
+<property>
+  <name>tez.runtime.compress.codec</name>
+  <value>org.apache.hadoop.io.compress.SnappyCodec</value>
+</property>
+
+<property>
+  <name>tez.runtime.io.sort.mb</name>
+  <value>1040</value>
+</property>
+
+<property>
+  <name>tez.runtime.optimize.local.fetch</name>
+  <value>true</value>
+</property>
+
+<property>
+  <name>tez.runtime.pipelined.sorter.sort.threads</name>
+  <value>2</value>
+</property>
+
+<property>
+  <name>tez.runtime.sorter.class</name>
+  <value>PIPELINED</value>
+</property>
+
+<property>
+  <name>tez.runtime.unordered.output.buffer.size-mb</name>
+  <value>307</value>
+</property>
+
+<!-- configurable in Hive (Cf. HIVE-24485)  --> 
+<property>
+  <name>tez.shuffle-vertex-manager.max-src-fraction</name>
+  <value>0.4</value>
+</property>
+<property>
+  <name>tez.shuffle-vertex-manager.min-src-fraction</name>
+  <value>0.2</value>
+</property>
+
+<property>
+  <name>tez.runtime.pipelined.sorter.lazy-allocate.memory</name>
+  <value>true</value>
+</property>
+
+<property>
+  <name>tez.runtime.shuffle.parallel.copies</name>
+  <value>10</value>
+</property>
+
+<!-- MR3 0.4 -->
+
+<property>
+  <name>tez.runtime.pipelined.sorter.use.soft.reference</name>
+  <value>false</value>
+</property>
+
+<property>
+  <name>tez.shuffle-vertex-manager.enable.auto-parallel</name>
+  <value>true</value>
+</property>
+
+<!-- to disable auto parallelism, set tez.shuffle-vertex-manager.auto-parallel.min.num.tasks to a value larger than hive.exec.reducers.max in hive-site.xml -->
+<property>
+  <name>tez.shuffle-vertex-manager.auto-parallel.min.num.tasks</name>
+  <value>251</value>
+</property>
+
+<property>
+  <name>tez.shuffle-vertex-manager.auto-parallel.max.reduction.percentage</name>
+  <value>50</value>
+</property>
+
+<property>
+  <name>tez.shuffle-vertex-manager.use-stats-auto-parallelism</name>
+  <value>true</value>
+</property>
+
+<property>
+  <name>tez.shuffle.vertex.manager.auto.parallelism.min.percent</name>
+  <value>0</value>
+</property>
+
+<!-- MR3 0.5 -->
+
+<property>
+  <name>tez.am.shuffle.auxiliary-service.id</name>
+  <value>tez_shuffle</value>
+</property>
+
+<property>
+  <name>tez.shuffle.port</name>
+  <value>15551</value>
+</property>
+
+<property>
+  <name>tez.runtime.shuffle.keep-alive.enabled</name>
+  <value>true</value>
+</property>
+
+<property>
+  <name>tez.shuffle.connection-keep-alive.enable</name>
+  <value>true</value>
+</property>
+
+<property>
+  <name>tez.shuffle.max.threads</name>
+  <value>20</value>
+  <description>
+    Set to 'total number of threads for shuffle handlers / mr3.use.daemon.shufflehandler'
+  </description>
+</property>
+
+<property>
+  <name>tez.shuffle.listen.queue.size</name>
+  <value>16384</value>
+</property>
+
+<property>
+  <name>tez.shuffle.mapoutput-info.meta.cache.size</name>
+  <value>10000</value>
+</property>
+
+<!-- MR3 0.7 -->
+
+<!-- to use pipelined shuffling, disable speculative execution -->
+<property>
+  <name>tez.runtime.pipelined-shuffle.enabled</name>
+  <value>false</value>
+</property>
+
+<property>
+  <name>tez.runtime.enable.final-merge.in.output</name>
+  <value>true</value>
+</property>
+
+<property>
+  <name>tez.runtime.shuffle.memory-to-memory.enable</name>
+  <value>false</value>
+</property>
+
+<property>
+  <name>tez.runtime.task.input.post-merge.buffer.percent</name>
+  <value>0.0</value>
+</property>
+
+<!-- MR3 0.8 -->
+
+<property>
+  <name>tez.runtime.shuffle.connect.timeout</name>
+  <value>7500</value>
+  <description>
+    Set to 2500 in order not to retry when a connection failure occurs.
+  </description>
+</property>
+
+<!-- MR3 1.3 -->
+
+<property>
+  <name>tez.grouping.node.local.only</name>
+  <value>true</value>
+  <!-- do not use racks on Kubernetes -->
+</property>
+
+<!-- MR3 1.8 -->
+
+<property>
+  <name>tez.shuffle.indexcache.mb</name>
+  <value>20</value>
+</property>
+
+<property>
+  <name>tez.shuffle.indexcache.share</name>
+  <value>true</value>
+</property>
+
+<!-- MR3 1.9 -->
+
+<property>
+  <name>tez.runtime.use.free.memory.fetched.input</name>
+  <value>true</value>
+</property>
+
+<!-- MR3 1.10 -->
+
+<property>
+  <name>tez.runtime.shuffle.total.parallel.copies</name>
+  <value>360</value>
+</property>
+
+<property>
+  <name>tez.runtime.shuffle.max.copies.per.host</name>
+  <value>20</value>
+</property>
+
+<property>
+  <name>tez.runtime.shuffle.fetch.max.task.output.at.once</name>
+  <value>20</value>
+</property>
+
+<property>
+  <name>tez.runtime.shuffle.max.input.hostports</name>
+  <value>10000</value>
+</property>
+
+<property>
+  <name>tez.runtime.shuffle.read.timeout</name>
+  <value>60000</value>
+</property>
+
+<!-- CartesianProductVertexManager -->
+
+<property>
+  <name>tez.cartesian-product.grouping-fraction</name>
+  <value>0.75</value>
+</property>
+
+<property>
+  <name>tez.cartesian-product.min-ops-per-worker</name>
+  <value>1000000</value>
+</property>
+
+<!-- Secure shuffle -->
+<!-- 
+  if hadoop.security.credential.provider.path is not set in core-site.xml,
+    passwords are read dirctly from tez-site.xml in text.
+  if hadoop.security.credential.provider.path is set in core-site.xml,
+    passwords are read from the credential file.
+ -->
+
+<property>
+  <name>tez.runtime.shuffle.ssl.enable</name>
+  <value>false</value>
+</property>
+
+<property>
+  <name>ssl.server.truststore.location</name>
+  <value>/opt/mr3-run/key/mr3-truststore.jks</value>
+</property>
+
+<property>
+  <name>ssl.server.truststore.password</name>
+  <value>truststore_password</value>
+</property>
+
+<property>
+  <name>ssl.server.keystore.location</name>
+  <value>/opt/mr3-run/key/mr3-keystore.jks</value>
+</property>
+
+<property>
+  <name>ssl.server.keystore.password</name>
+  <value>keystore_password</value>
+</property>
+
+<property>
+  <name>ssl.server.keystore.keypassword</name>
+  <value>key_password</value>
+</property>
+
+<property>
+  <name>ssl.client.truststore.location</name>
+  <value>/opt/mr3-run/key/mr3-truststore.jks</value>
+</property>
+
+<property>
+  <name>ssl.client.truststore.password</name>
+  <value>truststore_password</value>
+</property>
+
+</configuration>

@@ -17,17 +17,13 @@ USER root
 # create directories under /opt/mr3-run
 
 RUN mkdir -p /opt/mr3-run && \
-    mkdir -p /opt/mr3-run/key && \
-    mkdir -p /opt/mr3-run/conf && \
+    mkdir -p /opt/mr3-run/scratch-dir && \
     mkdir -p /opt/mr3-run/work-dir && \
     mkdir -p /opt/mr3-run/work-local-dir && \
-    mkdir -p /opt/mr3-run/am-local-dir && \
-    mkdir -p /opt/mr3-run/scratch-dir && \
-    mkdir -p /opt/mr3-run/hiveserver2-ranger-policycache && \
-    mkdir -p /opt/mr3-run/hive/run-result && \
+    mkdir -p /opt/mr3-run/key && \
+    mkdir -p /opt/mr3-run/conf && \
     mkdir -p /opt/mr3-run/hive/tmp && \
-    mkdir -p /opt/mr3-run/host-lib && \
-    mkdir -p /opt/mr3-run/lib
+    mkdir -p /opt/mr3-run/hive/run-result 
 
 RUN yum install -y epel-release && yum install -y procps wget snappy-devel libzstd-devel && yum clean all
 
@@ -40,7 +36,10 @@ COPY mr3/mr3-setup.sh /opt/mr3-run/mr3/
 COPY tez/tez-setup.sh /opt/mr3-run/tez/
 
 COPY hadoop/apache-hadoop /opt/mr3-run/hadoop/apache-hadoop
-COPY hive/apache-hive /opt/mr3-run/hive/apache-hive
+COPY hive/apache-hive/lib/hive-exec-3.1.3.jar /opt/mr3-run/hive/apache-hive/lib/
+COPY hive/apache-hive/lib/hive-llap-common-3.1.3.jar /opt/mr3-run/hive/apache-hive/lib/
+COPY hive/apache-hive/lib/hive-llap-server-3.1.3.jar /opt/mr3-run/hive/apache-hive/lib/
+COPY hive/apache-hive/lib/hive-llap-tez-3.1.3.jar /opt/mr3-run/hive/apache-hive/lib/
 COPY lib /opt/mr3-run/lib
 COPY mr3/mr3lib /opt/mr3-run/mr3/mr3lib
 COPY tez/tezjar /opt/mr3-run/tez/tezjar
@@ -50,14 +49,13 @@ COPY tez/tezjar /opt/mr3-run/tez/tezjar
 WORKDIR /opt/mr3-run/hive
 
 ARG UID=1000
-RUN adduser --no-create-home --uid $UID hive && \
+RUN adduser --no-create-home --disabled-login --gecos "" --uid $UID hive && \
     chown hive /opt/mr3-run/scratch-dir && \
     chown hive /opt/mr3-run/work-dir && \
     chown hive /opt/mr3-run/work-local-dir && \
     chown hive /opt/mr3-run/hive && \
     chown hive /opt/mr3-run/hive/tmp && \
-    chown hive /opt/mr3-run/hive/run-result && \
-    chown hive /opt/mr3-run/lib
+    chown hive /opt/mr3-run/hive/run-result
 
 USER hive
 
