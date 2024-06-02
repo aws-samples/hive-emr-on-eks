@@ -1,9 +1,6 @@
-# RUN Hive metastore and Hive Server2 in EKS
+# Run Hive metastore and Hive Server2 in EKS
 
 This is a project containing multiple helm chart for Hive releated components.
-
-# How to Started
-
 Make sure you are in the correct branch
 
 ```bash
