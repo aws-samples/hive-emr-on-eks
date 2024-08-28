@@ -364,7 +364,7 @@
 
 <property>
   <name>mr3.k8s.host.aliases</name>
-  <value>database-1-instance-1.cn8svsalxpay.us-west-2.rds.amazonaws.com=192.168.51.50</value>
+  <value>red0=1.1.1.1</value>
 </property>
 
 <property>
@@ -377,17 +377,17 @@
   <value></value>
 </property>
 
-<!--
+
 <property>
   <name>mr3.k8s.pod.worker.emptydirs</name>
   <value>/opt/mr3-run/work-local-dir</value>
 </property>
- -->
+ 
 
 <!-- set to /ephemeral1 with instance storage mounted on /ephemeral1 for worker Pod on AWS EKS -->
 <property>
   <name>mr3.k8s.pod.worker.hostpaths</name>
-  <value>/data1/k8s</value>
+  <value></value>
 </property>
 
 <property>

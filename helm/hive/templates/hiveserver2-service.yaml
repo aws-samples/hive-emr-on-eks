@@ -4,7 +4,7 @@ metadata:
   #namespace: hivemr3
   name: {{ .Values.name.hive.service }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.hive.service.type }} 
   ports:
   - protocol: TCP
     port: {{ .Values.hive.port }}
@@ -16,5 +16,5 @@ spec:
     name: http
   selector:
     hivemr3_app: hiveserver2
-  externalIPs:
-  - {{ .Values.hive.externalIp }}
+  # externalIPs:
+  # - {{ .Values.hive.externalIp }}

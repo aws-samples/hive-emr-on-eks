@@ -90,16 +90,16 @@ spec:
         - containerPort: {{ .Values.metastore.port }}
           protocol: TCP
         # uncomment to use readiness/liveness probes
-        # readinessProbe:
-        #   tcpSocket:
-        #     port: {{ .Values.metastore.port }}
-        #   initialDelaySeconds: 30
-        #   periodSeconds: 60
-        # livenessProbe:
-        #   tcpSocket:
-        #     port: {{ .Values.metastore.port }}
-        #   initialDelaySeconds: 30
-        #   periodSeconds: 60
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.metastore.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.metastore.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 60
         volumeMounts:
         - name: env-k8s-volume
           mountPath: {{ .Values.dir.base }}/env.sh

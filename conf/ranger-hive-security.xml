@@ -15,7 +15,7 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?><configuration xmlns:xi="http://www.w3.org/2001/XInclude">
   <property>
     <name>ranger.plugin.hive.service.name</name>
-    <value>INDIGO_hive</value>
+    <value>ranger-svc</value>
     <description>
       Name of the Ranger service containing policies for this YARN instance
     </description>
@@ -31,7 +31,7 @@
 
   <property>
     <name>ranger.plugin.hive.policy.rest.url</name>
-    <value>http://red0:6080</value>
+    <value>http://ranger-svc.hive.svc.cluster.local:6080</value>
     <description>
       URL to Ranger Admin (https://red0:6182 when using SSL)
     </description>

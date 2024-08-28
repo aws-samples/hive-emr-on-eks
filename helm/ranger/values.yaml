@@ -1,21 +1,22 @@
 name:
   ranger:
-    configMap: hivemr3-ranger-configmap
-    secret: hivemr3-ranger-secret
+    configMap: ranger-configmap
+    secret: ranger-secret
   persistentVolume: workdir-ranger-pv
   persistentVolumeClaim: workdir-ranger-pvc
 
 docker:
   image: mr3project/ranger:2.4.0
   user: ranger
-  imagePullPolicy: Always
+  imagePullPolicy: IfNotPresent
   imagePullSecrets: 
 
 ranger:
+  service:
+    type: ClusterIP
   httpPort: 6080
   httpsPort: 6182
   solrPort: 6083
-  externalIp: 1.1.1.1
 
   createSecret: true
 
@@ -39,7 +40,7 @@ workDir:
   # field name.persistentVolume, and PersistentVolume if necessary
   create: true
 
-  isNfs: true
+  isNfs: false
   nfs:
     server: "1.1.1.1"
     path: "/work/nfs/ranger"
@@ -50,12 +51,6 @@ workDir:
   # volumeStr should be indented properly with a double space (or multiple double spaces) after '\n'.
   #   ex. okay  -> volumeStr: "hostPath:\n  path: /work/nfs/mr3-run-work-dir"
   #   ex. wrong -> volumeStr: "hostPath:\n path: /work/nfs/mr3-run-work-dir"
-  volumeStr: 
+  volumeStr: "hostPath:\n  path: /opt/ranger/workdir"
     
 logLevel: INFO
-
-hostAliases:
-- ip: "1.1.1.1"
-  hostnames:
-  - "red0"
-

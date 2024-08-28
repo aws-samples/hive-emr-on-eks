@@ -26,7 +26,7 @@
 
   <property>
     <name>xasecure.audit.destination.solr.urls</name>
-    <value>http://red0:6083/solr/ranger_audits</value>
+    <value>http://ranger-svc.hive.svc.cluster.local:6083/solr/ranger_audits</value>
   </property>
 
   <property>

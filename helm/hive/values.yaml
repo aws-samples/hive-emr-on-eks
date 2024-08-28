@@ -71,9 +71,10 @@ metastore:
   heapSize: 8192
 
 hive:
+  service:
+   type: ClusterIP
   port: 9852
   httpport: 10001
-  externalIp: 1.1.1.1
   replicas: 1
   # amMode options: kubernetes, localthread, and localprocess
   amMode: kubernetes
@@ -132,7 +133,7 @@ workDir:
   # volumeStr should be indented properly with a double space (or multiple double spaces) after '\n'.
   #   ex. okay  -> volumeStr: "hostPath:\n  path: /work/nfs/mr3-run-work-dir"
   #   ex. wrong -> volumeStr: "hostPath:\n path: /work/nfs/mr3-run-work-dir"
-  volumeStr: "hostPath:\n  path: /data1/hive/workdir"
+  volumeStr: "hostPath:\n  path: /opt/hive/workdir"
 
 prometheus:
   create: false
@@ -140,9 +141,3 @@ prometheus:
   externalIp: 1.1.1.1
 
 logLevel: INFO
-
-hostAliases:
-- ip: "1.1.1.1"
-  hostnames:
-  - "red0"
-

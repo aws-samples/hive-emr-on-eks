@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  namespace: hivemr3
-  name: hivemr3-ranger
+  # namespace: hivemr3
+  name: ranger
 spec:
   serviceName: ranger
   replicas: 1
@@ -11,8 +11,8 @@ spec:
       hivemr3_app: ranger
   template:
     metadata:
-      namespace: hivemr3
-      name: hivemr3-ranger
+      # namespace: hivemr3
+      name: ranger
       labels:
         hivemr3_app: ranger
         mr3-pod-role: master-role

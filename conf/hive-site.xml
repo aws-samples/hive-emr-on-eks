@@ -153,11 +153,11 @@
  -->
 <property>
   <name>hive.metastore.pre.event.listeners</name>
-  <value>org.apache.hadoop.hive.ql.security.authorization.AuthorizationPreEventListener</value>
+  <value></value>
 </property>
 <property>
   <name>metastore.pre.event.listeners</name>
-  <value>org.apache.hadoop.hive.ql.security.authorization.AuthorizationPreEventListener</value>
+  <value></value>
 </property>
 
 <property>
@@ -302,15 +302,15 @@
 
 <property>
   <name>hive.security.authenticator.manager</name>
-  <value>org.apache.hadoop.hive.ql.security.HadoopDefaultAuthenticator</value>
+  <!-- <value>org.apache.hadoop.hive.ql.security.HadoopDefaultAuthenticator</value> -->
   <!-- <value>org.apache.hadoop.hive.ql.security.ProxyUserAuthenticator</value> -->
-  <!-- <value>org.apache.hadoop.hive.ql.security.SessionStateUserAuthenticator</value> -->
+  <value>org.apache.hadoop.hive.ql.security.SessionStateUserAuthenticator</value>
 </property>
 
 <property>
   <name>hive.security.authorization.manager</name>
-  <value>org.apache.hadoop.hive.ql.security.authorization.plugin.sqlstd.SQLStdConfOnlyAuthorizerFactory</value>
-  <!-- <value>org.apache.hadoop.hive.ql.security.authorization.plugin.sqlstd.SQLStdHiveAuthorizerFactory</value> -->
+  <!-- <value>org.apache.hadoop.hive.ql.security.authorization.plugin.sqlstd.SQLStdConfOnlyAuthorizerFactory</value> -->
+  <value>org.apache.hadoop.hive.ql.security.authorization.plugin.sqlstd.SQLStdHiveAuthorizerFactory</value>
   <!-- <value>org.apache.ranger.authorization.hive.authorizer.RangerHiveAuthorizerFactory</value> -->
 </property>
 
@@ -377,7 +377,7 @@
 
 <property>
   <name>javax.jdo.option.ConnectionPassword</name>
-  <value>UA}J9_fkal4hoQP$#9rJSt3*p%N!</value>
+  <value>6Kyh|kDPBM-Ojs)-m_6htm]%nm1S</value>
 </property>
 
 <property>

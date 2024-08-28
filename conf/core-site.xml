@@ -2,7 +2,7 @@
 
 <property>
   <name>fs.defaultFS</name>
-  <value>s3a://emr-on-eks-rss-021732063925-us-west-2/hive</value>
+  <value>s3://emr-on-eks-rss-021732063925-us-west-2/hive</value>
 </property>
 
 <property>
