@@ -33,13 +33,13 @@ setuptools.setup(
     packages=setuptools.find_packages(where="source"),
 
     install_requires=[
-        "aws-cdk-lib==2.79.0",
+        "aws-cdk-lib==2.141.0",
         "constructs>=10.0.0,<11.0.0",
-        "pyyaml==5.4",
-        "aws-cdk.lambda-layer-kubectl-v26"
+        "pyyaml==6.0.1",
+        "aws-cdk.lambda-layer-kubectl-v28"
     ],
 
-    python_requires=">=3.6",
+    python_requires=">=3.7",
 
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -50,9 +50,10 @@ setuptools.setup(
 
         "Programming Language :: JavaScript",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
 
         "Topic :: Software Development :: Code Generators",
         "Topic :: Utilities",

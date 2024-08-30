@@ -1,7 +1,7 @@
 from aws_cdk import (aws_eks as eks,aws_ec2 as ec2)
 from constructs import Construct
 from aws_cdk.aws_iam import IRole
-from aws_cdk.lambda_layer_kubectl_v26 import KubectlV26Layer
+from aws_cdk.lambda_layer_kubectl_v28 import KubectlV28Layer
 
 class EksConst(Construct):
 
@@ -25,10 +25,10 @@ class EksConst(Construct):
                 cluster_name=eksname,
                 masters_role=eks_adminrole,
                 output_cluster_name=True,
-                version= eks.KubernetesVersion.V1_26,
+                version= eks.KubernetesVersion.V1_28,
                 endpoint_access= eks.EndpointAccess.PUBLIC_AND_PRIVATE,
                 default_capacity=0,
-                kubectl_layer=KubectlV26Layer(self, 'KubectlV26Layer')
+                kubectl_layer=KubectlV28Layer(self, 'KubectlV28Layer')
         )
 
 

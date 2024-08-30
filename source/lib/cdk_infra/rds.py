@@ -18,7 +18,7 @@ class RDS_HMS(Construct):
             self, "Aurora",
             default_database_name=cluster_name,
             engine=rds.DatabaseClusterEngine.aurora_mysql(
-                version=rds.AuroraMysqlEngineVersion.VER_3_01_0
+                version=rds.AuroraMysqlEngineVersion.VER_3_04_0
             ),
             instance_props={
                 "vpc_subnets":{

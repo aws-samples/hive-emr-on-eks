@@ -116,7 +116,7 @@ docker push $DOCKERHUB_USERNAME/hive-metastore:3.0.0
 3. Copy sample data to your S3 bucket:
 **NOTE**: amazon-reviews-pds is not a public dataset anymore. Either skip this step or copy your own review data or use other public dataset you know of.
 ```bash
-aws s3 cp s3://amazon-reviews-pds/parquet/product_category=Toys/ s3://$S3BUCKET/app_code/data/toy --recursive
+aws s3 cp s3://aws-bigdata-blog/generated_synthetic_reviews/data/product_category=Toys_Games/ s3://$S3BUCKET/app_code/data/toy --recursive
 ```
 
 ## 1.1 Connect Hive metastore via JDBC
@@ -133,7 +133,8 @@ spark = SparkSession \
     .getOrCreate()
 spark.sql("SHOW DATABASES").show()
 spark.sql("CREATE DATABASE IF NOT EXISTS `demo`")
-spark.sql("CREATE EXTERNAL TABLE IF NOT EXISTS `demo`.`amazonreview`( `marketplace` string,`customer_id`string,`review_id` string,`product_id` string,`product_parent` string,`product_title` string,`star_rating` integer,`helpful_votes` integer,`total_votes` integer,`vine` string,`verified_purchase` string,`review_headline` string,`review_body` string,`review_date` date,`year` integer) STORED AS PARQUET LOCATION '"+sys.argv[1]+"/app_code/data/toy/'")
+
+spark.sql("CREATE EXTERNAL TABLE IF NOT EXISTS `demo`.`amazonreview`( `marketplace` string,`customer_id`string,`review_id` string,`product_id` string,`product_title` string,`star_rating` integer,`helpful_votes` integer,`total_votes` integer,`insight` string,`review_headline` string,`review_body` string,`review_date` timestamp,`year` integer) STORED AS PARQUET LOCATION '"+sys.argv[1]+"/app_code/data/toy/'")
 spark.sql("SELECT count(*) FROM demo.amazonreview").show()
 spark.stop()
 ```
@@ -190,7 +191,7 @@ spark = SparkSession \
     .getOrCreate()
 spark.sql("SHOW DATABASES").show()
 spark.sql("CREATE DATABASE IF NOT EXISTS `demo`")
-spark.sql("CREATE EXTERNAL TABLE IF NOT EXISTS `demo`.`amazonreview2`( `marketplace` string,`customer_id`string,`review_id` string,`product_id` string,`product_parent` string,`product_title` string,`star_rating` integer,`helpful_votes` integer,`total_votes` integer,`vine` string,`verified_purchase` string,`review_headline` string,`review_body` string,`review_date` date,`year` integer) STORED AS PARQUET LOCATION '"+sys.argv[1]+"/app_code/data/toy/'")
+spark.sql("CREATE EXTERNAL TABLE IF NOT EXISTS `demo`.`amazonreview2`( `marketplace` string,`customer_id`string,`review_id` string,`product_id` string,`product_title` string,`star_rating` integer,`helpful_votes` integer,`total_votes` integer,`insight` string,`review_headline` string,`review_body` string,`review_date` timestamp,`year` integer) STORED AS PARQUET LOCATION '"+sys.argv[1]+"/app_code/data/toy/'")
 spark.sql("SELECT count(*) FROM demo.amazonreview2").show()
 spark.stop()
 ```
@@ -242,7 +243,7 @@ spark = SparkSession \
 spark.sql("SHOW DATABASES").show()
 spark.sql("CREATE DATABASE IF NOT EXISTS `demo`")
 spark.sql("DROP TABLE IF EXISTS demo.amazonreview3")
-spark.sql("CREATE EXTERNAL TABLE IF NOT EXISTS `demo`.`amazonreview3`( `marketplace` string,`customer_id`string,`review_id` string,`product_id` string,`product_parent` string,`product_title` string,`star_rating` integer,`helpful_votes` integer,`total_votes` integer,`vine` string,`verified_purchase` string,`review_headline` string,`review_body` string,`review_date` date,`year` integer) STORED AS PARQUET LOCATION '"+sys.argv[1]+"/app_code/data/toy/'")
+spark.sql("CREATE EXTERNAL TABLE IF NOT EXISTS `demo`.`amazonreview3`( `marketplace` string,`customer_id`string,`review_id` string,`product_id` string,`product_title` string,`star_rating` integer,`helpful_votes` integer,`total_votes` integer,`insight` string,`review_headline` string,`review_body` string,`review_date` timestamp,`year` integer) STORED AS PARQUET LOCATION '"+sys.argv[1]+"/app_code/data/toy/'")
 ```
 
 ## 3.2 Submit hivethrift_eks.py job to EMR on EKS
@@ -312,7 +313,7 @@ spark = SparkSession \
 spark.sql("SHOW DATABASES").show()
 spark.sql("CREATE DATABASE IF NOT EXISTS `demo`")
 spark.sql("DROP TABLE IF EXISTS demo.amazonreview4")
-spark.sql("CREATE EXTERNAL TABLE `demo`.`amazonreview4`( `marketplace` string,`customer_id`string,`review_id` string,`product_id` string,`product_parent` string,`product_title` string,`star_rating` integer,`helpful_votes` integer,`total_votes` integer,`vine` string,`verified_purchase` string,`review_headline` string,`review_body` string,`review_date` date,`year` integer) STORED AS PARQUET LOCATION '"+sys.argv[1]+"/app_code/data/toy/'")
+spark.sql("CREATE EXTERNAL TABLE IF NOT EXISTS `demo`.`amazonreview4`( `marketplace` string,`customer_id`string,`review_id` string,`product_id` string,`product_title` string,`star_rating` integer,`helpful_votes` integer,`total_votes` integer,`insight` string,`review_headline` string,`review_body` string,`review_date` timestamp,`year` integer) STORED AS PARQUET LOCATION '"+sys.argv[1]+"/app_code/data/toy/'")
 
 # read from files
 sql_scripts=spark.read.text(sys.argv[1]+"/app_code/job/set-of-hive-queries.sql").collect()
