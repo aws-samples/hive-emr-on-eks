@@ -11,14 +11,29 @@ ENV METASTORE_HOME="/opt/hive-metastore"
 ONBUILD RUN echo "Skipping templates copy"
 
 FROM maven:3-eclipse-temurin-17-focal AS java-builder
-ARG AWS_SDK_VERSION=2.29.17
+ARG HADOOP_VERSION=3.3.0
+ARG AWS_SDK_V1_VERSION="1.12.778"
+ARG AWS_SDK_V2_VERSION="2.29.17"
 
 # Create a temporary pom.xml
 WORKDIR /build
-COPY templates/pom.xml.tpl .
+COPY templates/pom-sdk-* ./templates/
 
-# Replace placeholder with actual version and create pom.xml
-RUN sed "s/\${AWS_SDK_VERSION}/$AWS_SDK_VERSION/g" pom.xml.tpl > pom.xml
+## Add version comparison function
+RUN printf '%s\n' 'verlte() {' \
+    '  printf "%s\n" "$1" "$2" | sort -C -V' \
+    '}' > /usr/local/bin/verlte && \
+    chmod +x /usr/local/bin/verlte
+
+
+# Set AWS SDK version and select template and replace placeholder with actual version and create pom.xml
+RUN . /usr/local/bin/verlte && \
+    if verlte "3.4.0" "$HADOOP_VERSION"; then \
+      sed "s/\${AWS_SDK_VERSION}/$AWS_SDK_V2_VERSION/g" templates/pom-sdk-v2.xml.tpl > pom.xml; \
+    else \
+      sed "s/\${AWS_SDK_VERSION}/$AWS_SDK_V1_VERSION/g" templates/pom-sdk-v1.xml.tpl > pom.xml; \
+    fi
+
 
 # Download dependencies and show the directory contents
 RUN mvn dependency:copy-dependencies -DoutputDirectory=/build/dependencies
@@ -28,7 +43,7 @@ RUN mvn dependency:copy-dependencies -DoutputDirectory=/build/dependencies
 FROM build_${BUILD_ENV}
 
 ARG HMS_VERSION=3.0.0
-ARG HADOOP_VERSION=3.4.1
+ARG HADOOP_VERSION=3.3.0
 ARG MYSQL_CONNECTOR_VERSION=9.1.0
 ARG LOG4J_VERIONS=2.24.1
 
@@ -61,18 +76,29 @@ ENV HADOOP_CLASSPATH="${HADOOP_HOME}/share/hadoop/tools/lib/*:${HADOOP_HOME}/sha
 ENV PATH="${HADOOP_HOME}/bin:${METASTORE_HOME}/lib/mysql-connector-java.jar:${PATH}"
 
 
+# Copy verlte function from java-builder stage
+COPY --from=java-builder /usr/local/bin/verlte /usr/local/bin/verlte
 
-# Download and install Hadoop and remove unnecesarry lib
-RUN wget https://downloads.apache.org/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}-lean.tar.gz && \
-    tar -xzf hadoop-${HADOOP_VERSION}-lean.tar.gz && \
-    rm hadoop-${HADOOP_VERSION}-lean.tar.gz && \
+# Then modify the Hadoop download part to use verlte
+RUN . /usr/local/bin/verlte && \
+    if verlte "3.4.1" "${HADOOP_VERSION}"; then \
+        wget https://downloads.apache.org/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}-lean.tar.gz; \
+    else \
+        wget https://downloads.apache.org/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz; \
+    fi
+
+# Remove unnecesarry lib
+RUN tar -xzf hadoop-${HADOOP_VERSION}*.tar.gz && \
+    rm hadoop-${HADOOP_VERSION}*.tar.gz && \
     mv hadoop-${HADOOP_VERSION} $HADOOP_HOME && \
     rm -r ${HADOOP_HOME}/share/doc && \
     rm -r ${HADOOP_HOME}/share/hadoop/mapreduce/* && \
     rm -r ${HADOOP_HOME}/share/hadoop/yarn/* && \
     rm -r ${HADOOP_HOME}/share/hadoop/hdfs/* && \
     rm -r ${HADOOP_HOME}/share/hadoop/client/* && \
-    rm -r ${HADOOP_HOME}/lib/native
+    rm -r ${HADOOP_HOME}/lib/native && \
+    rm -f ${HADOOP_HOME}/share/hadoop/tools/lib/aws-java-sdk-bundle-1.* && \
+    rm -f ${HADOOP_HOME}/share/hadoop/tools/lib/bundle-2.*
 
 
 
