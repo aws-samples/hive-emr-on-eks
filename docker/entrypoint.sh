@@ -92,6 +92,9 @@ function render_templates() {
   local hadoop_conf_dir="${HADOOP_HOME}/etc/hadoop"
 
   if [ -d ${hive_conf_dir}/templates ]; then
+    AWS_SDK_VERSION=$(cat "${METASTORE_HOME}/conf/aws_sdk_version")
+    export AWS_SDK_VERSION
+    log "INFO" "AWS SDK Version: $AWS_SDK_VERSION"
     log "INFO" "🤖- Te(Go)mplating files!"
     log "INFO" "🗃️- Files to templating:"
     log "INFO" $(find ${hive_conf_dir}/templates/* -maxdepth 1)

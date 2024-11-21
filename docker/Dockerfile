@@ -29,9 +29,11 @@ RUN printf '%s\n' 'verlte() {' \
 # Set AWS SDK version and select template and replace placeholder with actual version and create pom.xml
 RUN . /usr/local/bin/verlte && \
     if verlte "3.4.0" "$HADOOP_VERSION"; then \
-      sed "s/\${AWS_SDK_VERSION}/$AWS_SDK_V2_VERSION/g" templates/pom-sdk-v2.xml.tpl > pom.xml; \
+      sed "s/\${AWS_SDK_VERSION}/$AWS_SDK_V2_VERSION/g" templates/pom-sdk-v2.xml.tpl > pom.xml && \
+      echo "2" >> aws_sdk_version; \
     else \
-      sed "s/\${AWS_SDK_VERSION}/$AWS_SDK_V1_VERSION/g" templates/pom-sdk-v1.xml.tpl > pom.xml; \
+      sed "s/\${AWS_SDK_VERSION}/$AWS_SDK_V1_VERSION/g" templates/pom-sdk-v1.xml.tpl > pom.xml && \
+      echo "1" >> aws_sdk_version; \
     fi
 
 
@@ -129,6 +131,7 @@ RUN ln -s $LIB_DIR/mysql-connector-java* ${HADOOP_HOME}/share/hadoop/common/lib/
 
 # Add additional jars, templates to the HMS classpath & mitigate log4j issues from CVE-2021-44228
 WORKDIR ${METASTORE_HOME}
+COPY --from=java-builder /build/aws_sdk_version ${METASTORE_HOME}/conf/aws_sdk_version
 RUN rm lib/log4j-* && \
     ln -s ${LIB_DIR}/log4j-* lib/ && \
     ln -s ${LIB_DIR}/mysql-connector-java* lib/ && \

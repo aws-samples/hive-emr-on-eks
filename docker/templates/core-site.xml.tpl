@@ -23,6 +23,12 @@
 
   <property>
     <name>fs.s3a.aws.credentials.provider</name>
-    <value>{{ env.Getenv "HIVE_CREDENTIALS_PROVIDER" "software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider" }}</value>
+    <value>
+      {{ if eq (env.Getenv "AWS_SDK_VERSION") "1" }}
+        {{ env.Getenv "HIVE_CREDENTIALS_PROVIDER" "com.amazonaws.auth.DefaultAWSCredentialsProviderChain" }}
+      {{ else if eq (env.Getenv "AWS_SDK_VERSION") "2" }}
+        {{ env.Getenv "HIVE_CREDENTIALS_PROVIDER" "software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider" }}
+      {{ end }}
+    </value>
   </property>
 </configuration>
