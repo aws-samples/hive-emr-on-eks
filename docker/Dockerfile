@@ -1,15 +1,28 @@
 ARG JAVA_IMAGE_TAG=17-jdk-noble
-ARG BUILD_ENV=no_templates
+ARG BUILD_ENV=templates
 
 # Template stages with ONBUILD triggers
 FROM eclipse-temurin:${JAVA_IMAGE_TAG} AS build_templates
 ENV METASTORE_HOME="/opt/hive-metastore"
 ONBUILD COPY templates "/build/templates/"
-ONBUILD COPY self-terminate.sh "/build/scripts/self-terminate.sh"
 
 FROM eclipse-temurin:${JAVA_IMAGE_TAG} AS build_no_templates
 ENV METASTORE_HOME="/opt/hive-metastore"
 ONBUILD RUN echo "Skipping templates copy"
+
+FROM maven:3-eclipse-temurin-17-focal AS java-builder
+ARG AWS_SDK_VERSION=2.29.17
+
+# Create a temporary pom.xml
+WORKDIR /build
+COPY templates/pom.xml.tpl .
+
+# Replace placeholder with actual version and create pom.xml
+RUN sed "s/\${AWS_SDK_VERSION}/$AWS_SDK_VERSION/g" pom.xml.tpl > pom.xml
+
+# Download dependencies and show the directory contents
+RUN mvn dependency:copy-dependencies -DoutputDirectory=/build/dependencies
+
 
 # Continue from the selected template stage
 FROM build_${BUILD_ENV}
@@ -18,6 +31,7 @@ ARG HMS_VERSION=3.0.0
 ARG HADOOP_VERSION=3.4.1
 ARG MYSQL_CONNECTOR_VERSION=9.1.0
 ARG LOG4J_VERIONS=2.24.1
+
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN apt update && apt install -y curl wget unzip procps --no-install-recommends && \
@@ -48,54 +62,61 @@ ENV PATH="${HADOOP_HOME}/bin:${METASTORE_HOME}/lib/mysql-connector-java.jar:${PA
 
 
 
-# Download and install Hadoop
+# Download and install Hadoop and remove unnecesarry lib
 RUN wget https://downloads.apache.org/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}-lean.tar.gz && \
     tar -xzf hadoop-${HADOOP_VERSION}-lean.tar.gz && \
     rm hadoop-${HADOOP_VERSION}-lean.tar.gz && \
     mv hadoop-${HADOOP_VERSION} $HADOOP_HOME && \
-    rm -r ${HADOOP_HOME}/share/doc
+    rm -r ${HADOOP_HOME}/share/doc && \
+    rm -r ${HADOOP_HOME}/share/hadoop/mapreduce/* && \
+    rm -r ${HADOOP_HOME}/share/hadoop/yarn/* && \
+    rm -r ${HADOOP_HOME}/share/hadoop/hdfs/* && \
+    rm -r ${HADOOP_HOME}/share/hadoop/client/* && \
+    rm -r ${HADOOP_HOME}/lib/native
 
 
 
-# Add additional jars to the Hadoop classpath
-ARG LIB_DIR=${HADOOP_HOME}/share/hadoop/tools/lib
-
-ADD https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-1.2-api/${LOG4J_VERIONS}/log4j-1.2-api-${LOG4J_VERIONS}.jar $LIB_DIR/
-ADD https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/${LOG4J_VERIONS}/log4j-api-${LOG4J_VERIONS}.jar $LIB_DIR/
-ADD https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/${LOG4J_VERIONS}/log4j-core-${LOG4J_VERIONS}.jar $LIB_DIR/
-ADD https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-slf4j18-impl/2.18.0/log4j-slf4j18-impl-2.18.0.jar $LIB_DIR/
-ADD https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/${MYSQL_CONNECTOR_VERSION}/mysql-connector-j-${MYSQL_CONNECTOR_VERSION}.jar $LIB_DIR/mysql-connector-java.jar
-
-
-RUN ln -s $LIB_DIR/mysql-connector-java* ${HADOOP_HOME}/share/hadoop/common/lib/ && \
-    chmod 0644 ${LIB_DIR}/*
-
-
-# Download the standalone hive metastore
+# Download and install Hive Metastore Standalone (HMS)
 RUN wget https://downloads.apache.org/hive/hive-standalone-metastore-${HMS_VERSION}/hive-standalone-metastore-${HMS_VERSION}-bin.tar.gz && \
     tar -xzf hive-standalone-metastore-${HMS_VERSION}-bin.tar.gz && \
     rm hive-standalone-metastore-${HMS_VERSION}-bin.tar.gz && \
     mv apache-hive-metastore-${HMS_VERSION}-bin $METASTORE_HOME
 
 
+# Add additional jars to the Hadoop classpath
+ARG LIB_DIR=${HADOOP_HOME}/share/hadoop/tools/lib
 
-# Add additional jars to the HMS classpath & mitigate log4j issues from CVE-2021-44228
+# Add AWS Log4j and MySQL Driver dependencies
+RUN wget -P $LIB_DIR https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-1.2-api/${LOG4J_VERIONS}/log4j-1.2-api-${LOG4J_VERIONS}.jar && \
+    wget -P $LIB_DIR https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/${LOG4J_VERIONS}/log4j-api-${LOG4J_VERIONS}.jar && \
+    wget -P $LIB_DIR https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/${LOG4J_VERIONS}/log4j-core-${LOG4J_VERIONS}.jar && \
+    wget -P $LIB_DIR https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-slf4j18-impl/2.18.0/log4j-slf4j18-impl-2.18.0.jar && \
+    wget -P $LIB_DIR https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/${MYSQL_CONNECTOR_VERSION}/mysql-connector-j-${MYSQL_CONNECTOR_VERSION}.jar -O $LIB_DIR/mysql-connector-java.jar
+
+
+# Add AWS SDK dependencies
+COPY --from=java-builder /build/dependencies $LIB_DIR
+
+RUN ln -s $LIB_DIR/mysql-connector-java* ${HADOOP_HOME}/share/hadoop/common/lib/ && \
+    chmod 0644 ${LIB_DIR}/*
+
+
+# Add additional jars, templates to the HMS classpath & mitigate log4j issues from CVE-2021-44228
 WORKDIR ${METASTORE_HOME}
 RUN rm lib/log4j-* && \
-   ln -s ${LIB_DIR}/log4j-* lib/ && \
-   ln -s ${LIB_DIR}/mysql-connector-java* lib/ && \
-   chmod 0644 lib/*
-
-RUN if [ -d "/build/templates" ]; then \
+    ln -s ${LIB_DIR}/log4j-* lib/ && \
+    ln -s ${LIB_DIR}/mysql-connector-java* lib/ && \
+    chmod 0644 lib/* && \
+    if [ -d "/build/templates" ]; then \
         mkdir -p "${METASTORE_HOME}/conf/templates/" && \
-        cp -r /build/templates/* "${METASTORE_HOME}/conf/templates/" && \
-        cp /build/scripts/self-terminate.sh /bin/self-terminate.sh ; \
+        cp -r /build/templates/* "${METASTORE_HOME}/conf/templates/"; \
     else \
         echo "Templates directory not found, skipping copy"; \
     fi
 
 COPY conf/metastore-log4j2.properties conf/
 COPY entrypoint.sh bin/
+COPY self-terminate.sh bin/
 RUN chmod +x bin/entrypoint.sh
 
 EXPOSE 9083

@@ -10,7 +10,7 @@
     <name>fs.s3a.impl</name>
     <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
   </property>
-w
+
   <property>
     <name>fs.s3.impl</name>
     <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
@@ -23,6 +23,6 @@ w
 
   <property>
     <name>fs.s3a.aws.credentials.provider</name>
-    <value>com.amazonaws.auth.DefaultAWSCredentialsProviderChain</value>
+    <value>{{ env.Getenv "HIVE_CREDENTIALS_PROVIDER" "software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider" }}</value>
   </property>
 </configuration>
