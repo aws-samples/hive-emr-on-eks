@@ -23,5 +23,10 @@
             <artifactId>aws-java-sdk-s3</artifactId>
             <version>${AWS_SDK_VERSION}</version>
         </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-dynamodb</artifactId>
+            <version>${AWS_SDK_VERSION}</version>
+        </dependency>
     </dependencies>
 </project>

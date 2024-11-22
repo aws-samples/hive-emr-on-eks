@@ -1,29 +1,41 @@
 ARG JAVA_IMAGE_TAG=17-jdk-noble
 ARG BUILD_ENV=templates
-
-# Template stages with ONBUILD triggers
-FROM eclipse-temurin:${JAVA_IMAGE_TAG} AS build_templates
-ENV METASTORE_HOME="/opt/hive-metastore"
-ONBUILD COPY templates "/build/templates/"
-
-FROM eclipse-temurin:${JAVA_IMAGE_TAG} AS build_no_templates
-ENV METASTORE_HOME="/opt/hive-metastore"
-ONBUILD RUN echo "Skipping templates copy"
-
-FROM maven:3-eclipse-temurin-17-focal AS java-builder
-ARG HADOOP_VERSION=3.3.0
+ARG HMS_VERSION=3.0.0
+ARG HADOOP_VERSION=3.4.1
+ARG MYSQL_CONNECTOR_VERSION=9.1.0
+ARG LOG4J_VERIONS=2.24.1
 ARG AWS_SDK_V1_VERSION="1.12.778"
 ARG AWS_SDK_V2_VERSION="2.29.17"
 
-# Create a temporary pom.xml
-WORKDIR /build
-COPY templates/pom-sdk-* ./templates/
+
+# Template stages with ONBUILD triggers
+FROM eclipse-temurin:${JAVA_IMAGE_TAG} AS build_templates
+ONBUILD COPY templates/core-site.xml.tpl "/build/templates/"
+ONBUILD COPY templates/metastore-site.xml.tpl "/build/templates/"
+
+FROM eclipse-temurin:${JAVA_IMAGE_TAG} AS build_no_templates
+ONBUILD RUN echo "Skipping templates copy"
+
+
+FROM eclipse-temurin:${JAVA_IMAGE_TAG} AS build_functions
 
 ## Add version comparison function
 RUN printf '%s\n' 'verlte() {' \
     '  printf "%s\n" "$1" "$2" | sort -C -V' \
     '}' > /usr/local/bin/verlte && \
     chmod +x /usr/local/bin/verlte
+
+FROM maven:3-eclipse-temurin-17-focal AS java-builder
+ARG HADOOP_VERSION
+ARG AWS_SDK_V1_VERSION
+ARG AWS_SDK_V2_VERSION
+
+# Copy verlte function from build_functions stage
+COPY --from=build_functions /usr/local/bin/verlte /usr/local/bin/verlte
+
+# Create a temporary pom.xml
+WORKDIR /build
+COPY templates/pom-sdk-* ./templates/
 
 
 # Set AWS SDK version and select template and replace placeholder with actual version and create pom.xml
@@ -42,19 +54,18 @@ RUN mvn dependency:copy-dependencies -DoutputDirectory=/build/dependencies
 
 
 # Continue from the selected template stage
-FROM build_${BUILD_ENV}
+FROM build_${BUILD_ENV} AS build
 
-ARG HMS_VERSION=3.0.0
-ARG HADOOP_VERSION=3.3.0
-ARG MYSQL_CONNECTOR_VERSION=9.1.0
-ARG LOG4J_VERIONS=2.24.1
+ARG HMS_VERSION
+ARG HADOOP_VERSION
+ARG MYSQL_CONNECTOR_VERSION
+ARG LOG4J_VERIONS
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN apt update && apt install -y curl wget unzip procps --no-install-recommends && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
-
 
 
 # Install Gomplate with architecture detection
@@ -70,7 +81,6 @@ RUN ARCH=$(uname -m); \
     chmod 755 /usr/local/bin/gomplate
 
 
-
 # Set Hadoop/HiveMetastore Classpath
 ENV HADOOP_HOME="/opt/hadoop"
 ENV METASTORE_HOME="/opt/hive-metastore"
@@ -78,8 +88,8 @@ ENV HADOOP_CLASSPATH="${HADOOP_HOME}/share/hadoop/tools/lib/*:${HADOOP_HOME}/sha
 ENV PATH="${HADOOP_HOME}/bin:${METASTORE_HOME}/lib/mysql-connector-java.jar:${PATH}"
 
 
-# Copy verlte function from java-builder stage
-COPY --from=java-builder /usr/local/bin/verlte /usr/local/bin/verlte
+# Copy verlte function from build_functions stage
+COPY --from=build_functions /usr/local/bin/verlte /usr/local/bin/verlte
 
 # Then modify the Hadoop download part to use verlte
 RUN . /usr/local/bin/verlte && \
@@ -122,17 +132,13 @@ RUN wget -P $LIB_DIR https://repo1.maven.org/maven2/org/apache/logging/log4j/log
     wget -P $LIB_DIR https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/${MYSQL_CONNECTOR_VERSION}/mysql-connector-j-${MYSQL_CONNECTOR_VERSION}.jar -O $LIB_DIR/mysql-connector-java.jar
 
 
-# Add AWS SDK dependencies
-COPY --from=java-builder /build/dependencies $LIB_DIR
-
 RUN ln -s $LIB_DIR/mysql-connector-java* ${HADOOP_HOME}/share/hadoop/common/lib/ && \
     chmod 0644 ${LIB_DIR}/*
 
 
 # Add additional jars, templates to the HMS classpath & mitigate log4j issues from CVE-2021-44228
 WORKDIR ${METASTORE_HOME}
-COPY --from=java-builder /build/aws_sdk_version ${METASTORE_HOME}/conf/aws_sdk_version
-RUN rm lib/log4j-* && \
+RUN rm lib/log4j-* && rm lib/guava* && \
     ln -s ${LIB_DIR}/log4j-* lib/ && \
     ln -s ${LIB_DIR}/mysql-connector-java* lib/ && \
     chmod 0644 lib/* && \
@@ -148,5 +154,30 @@ COPY entrypoint.sh bin/
 COPY self-terminate.sh bin/
 RUN chmod +x bin/entrypoint.sh
 
+
+FROM eclipse-temurin:${JAVA_IMAGE_TAG}
+
+# Set Hadoop/HiveMetastore Classpath
+ENV HADOOP_HOME="/opt/hadoop"
+ENV METASTORE_HOME="/opt/hive-metastore"
+ENV HADOOP_CLASSPATH="${HADOOP_HOME}/share/hadoop/tools/lib/*:${HADOOP_HOME}/share/hadoop/common/lib/*"
+ENV PATH="${HADOOP_HOME}/bin:${METASTORE_HOME}/lib/mysql-connector-java.jar:${PATH}"
+
+
+# Add additional jars to the Hadoop classpath
+ARG LIB_DIR=${HADOOP_HOME}/share/hadoop/tools/lib
+COPY --from=java-builder /build/aws_sdk_version ${METASTORE_HOME}/conf/aws_sdk_version
+COPY --from=java-builder /build/dependencies $LIB_DIR
+
+# Add Go Template
+COPY --from=build /usr/local/bin/gomplate /usr/local/bin/gomplate
+
+# Add Hadoop
+COPY --from=build /opt/hadoop /opt/hadoop
+
+# Add Hive Metastore Standalone
+COPY --from=build /opt/hive-metastore /opt/hive-metastore
+
+WORKDIR ${METASTORE_HOME}
 EXPOSE 9083
 ENTRYPOINT ["bin/entrypoint.sh"]
