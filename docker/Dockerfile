@@ -17,26 +17,19 @@ FROM eclipse-temurin:${JAVA_IMAGE_TAG} AS build_no_templates
 ONBUILD RUN echo "Skipping templates copy"
 
 
-FROM eclipse-temurin:${JAVA_IMAGE_TAG} AS build_functions
-
-## Add version comparison function
-RUN printf '%s\n' 'verlte() {' \
-    '  printf "%s\n" "$1" "$2" | sort -C -V' \
-    '}' > /usr/local/bin/verlte && \
-    chmod +x /usr/local/bin/verlte
-
 FROM maven:3-eclipse-temurin-17-focal AS java-builder
 ARG HADOOP_VERSION
 ARG AWS_SDK_V1_VERSION
 ARG AWS_SDK_V2_VERSION
 
-# Copy verlte function from build_functions stage
-COPY --from=build_functions /usr/local/bin/verlte /usr/local/bin/verlte
-
 # Create a temporary pom.xml
 WORKDIR /build
 COPY templates/pom-sdk-* ./templates/
 
+RUN printf '%s\n' 'verlte() {' \
+    '  printf "%s\n" "$1" "$2" | sort -C -V' \
+    '}' > /usr/local/bin/verlte && \
+    chmod +x /usr/local/bin/verlte
 
 # Set AWS SDK version and select template and replace placeholder with actual version and create pom.xml
 RUN . /usr/local/bin/verlte && \
@@ -88,16 +81,8 @@ ENV HADOOP_CLASSPATH="${HADOOP_HOME}/share/hadoop/tools/lib/*:${HADOOP_HOME}/sha
 ENV PATH="${HADOOP_HOME}/bin:${METASTORE_HOME}/lib/mysql-connector-java.jar:${PATH}"
 
 
-# Copy verlte function from build_functions stage
-COPY --from=build_functions /usr/local/bin/verlte /usr/local/bin/verlte
-
 # Then modify the Hadoop download part to use verlte
-RUN . /usr/local/bin/verlte && \
-    if verlte "3.4.1" "${HADOOP_VERSION}"; then \
-        wget https://downloads.apache.org/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}-lean.tar.gz; \
-    else \
-        wget https://downloads.apache.org/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz; \
-    fi
+RUN wget https://archive.apache.org/dist/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz;
 
 # Remove unnecesarry lib
 RUN tar -xzf hadoop-${HADOOP_VERSION}*.tar.gz && \
