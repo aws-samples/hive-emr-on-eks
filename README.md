@@ -274,30 +274,74 @@ aws emr-containers start-job-run \
 ## 4.1 Run the thrift service as a sidecar in Spark Driver's pod
 <img src="source/img/4-hms-sidecar.png" width="350">
 
-** Prerequisite **
+
+### 4.1.1 Prerequisites
 `NOTE: This repo's CFN/CDK template installs the followings by default.`
-- 1. [Kubernetes External Secrets controller](https://github.com/external-secrets/kubernetes-external-secrets) - it fetchs hive metastore DB credentials from [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/). This is a recommended best practice. Alternatively, without installing the controller, simply modify the [HMS sidecar pod template](deployment/app_code/job/sidecar_hms_pod_template.yaml) with hard coded DB credentials. 
+
+
+### 4.1.1.1 Kubernetes External Secrets controller
+[Kubernetes External Secrets controller](https://github.com/external-secrets/kubernetes-external-secrets) - it fetchs hive metastore DB credentials from [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/). This is a recommended best practice. Alternatively, without installing the controller, simply modify the [HMS sidecar pod template](deployment/app_code/job/sidecar_hms_pod_template.yaml) with hard coded DB credentials. 
+
 ```bash
 # does it exist?
 kubectl get pod -n kube-system
 ```
+
 If the controller doesn't exist in your EKS cluster, replace the variable placeholder: `YOUR_REGION` & `YOUR_IAM_ROLE_ARN_TO_GET_SECRETS_FROM_SM` in the command, then run the installation. Refer to the [IAM permissions](source/app_resources/ex-secret-iam-role.yaml) used by CDK to create your IAM role.
+
 ```bash
 helm repo add external-secrets https://external-secrets.github.io/kubernetes-external-secrets/
 helm install external-secret external-secrets/kubernetes-external-secrets -n kube-system  --set AWS_REGION=YOUR_REGION --set securityContext.fsGroup=65534 --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"='YOUR_IAM_ROLE_ARN_TO_GET_SECRETS_FROM_SM' --debug
 ```
-- 2. Two sidecar config maps should be created in EKS, which are pointing to the metastore-site.xml, core-site.xml templates to configure the standalone HMS. The sidecar termination script is copied from the [EMR document](https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/pod-templates.html), in order to workaround the well-known [sidecar lifecyle issue](https://github.com/kubernetes/enhancements/issues/753#issuecomment-713471597) in kubernetes.
+
+### 4.1.1.2 EMR on EKS Sidecar Configuration
+
+When using the HMS image as a sidecar in EMR on EKS, you can either:
+
+1. **Use Built-in Templates**: Build the image with templates included (`BUILD_ENV=templates`) which contains:
+   - Pre-configured `metastore-site.xml` and `core-site.xml` templates
+   - Self-termination script to handle the [sidecar lifecycle issue](https://github.com/kubernetes/enhancements/issues/753#issuecomment-713471597)
+
+2. **Use ConfigMaps**: Create two ConfigMaps in EKS that point to your custom `metastore-site.xml` and `core-site.xml` templates. This approach gives you more flexibility in configuration management.
+
+#### Using ConfigMaps (Optional - only if not using built-in templates)
+Two sidecar ConfigMaps should be created in EKS to configure the standalone HMS. The sidecar termination script is copied from the [EMR document](https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/pod-templates.html) to work around the well-known [sidecar lifecycle issue](https://github.com/kubernetes/enhancements/issues/753#issuecomment-713471597) in Kubernetes.
+
+Check if ConfigMaps exist:
 ```bash
 kubectl get configmap sidecar-hms-conf-templates sidecar-terminate-script -n emr
 ```
-If they don't exist, run the command to create the configs:
+
+If they don't exist and you want to use custom configurations, create them:
 ```bash
 # get remote metastore RDS secret name
 secret_name=$(aws secretsmanager list-secrets --query 'SecretList[?starts_with(Name,`RDSAuroraSecret`) == `true`].Name' --output text)
 # download the config and apply to EKS
 curl https://raw.githubusercontent.com/aws-samples/hive-emr-on-eks/main/source/app_resources/hive-metastore-config.yaml | sed 's/{SECRET_MANAGER_NAME}/'$secret_name'/g' | kubectl apply -f -
 ```
-- 3. the [HMS sidecar pod template](/deployment/app_code/job/sidecar_hms_pod_template.yaml) is uploaded to an S3 bucket that your Spark job can access.
+
+**Note:** If you're using the HMS image built with templates (`BUILD_ENV=templates`), you don't need to create these ConfigMaps unless you want to override the built-in configurations.
+
+### 4.1.2 HMS Sidecar Pod Templates
+
+Two HMS sidecar pod templates are available for different deployment scenarios:
+
+1. **Template with ConfigMap** ([sidecar_hms_pod_template.yaml](/deployment/app_code/job/sidecar_hms_pod_template.yaml)): 
+    - Uses external ConfigMaps for HMS configurations
+    - Suitable when you want to manage configurations separately
+    - Requires ConfigMaps `sidecar-hms-conf-templates` and `sidecar-terminate-script` to be present in the EKS cluster   
+   
+
+2. **Standalone Template** ([sidecar_hms_pod_template_standalone.yaml](/deployment/app_code/job/sidecar_hms_pod_template_standalone.yaml)):
+   - Uses built-in templates from the Docker image
+   - Recommended when using the image built with `BUILD_ENV=templates`
+   - No external ConfigMaps required
+   - Simpler deployment as all configurations are packaged in the image
+
+Both templates need to be uploaded to an S3 bucket that your Spark job can access. Choose the appropriate template based on your configuration management preferences.
+
+**Note:** Both templates use Kubernetes secrets (`rds-hms-secret`) for database credentials. You can alternatively hardcode these values by uncommenting and updating the corresponding environment variables in the template.
+
 
 **sidecar_hivethrift_eks.py:**
 ```python
@@ -305,10 +349,10 @@ import sys
 from pyspark.sql import SparkSession
 
 spark = SparkSession \
-    .builder \
-    .config("spark.sql.warehouse.dir", sys.argv[1]+"/warehouse/" ) \
-    .enableHiveSupport() \
-    .getOrCreate()
+  .builder \
+  .config("spark.sql.warehouse.dir", sys.argv[1]+"/warehouse/" ) \
+  .enableHiveSupport() \
+  .getOrCreate()
 
 spark.sql("SHOW DATABASES").show()
 spark.sql("CREATE DATABASE IF NOT EXISTS `demo`")
@@ -319,8 +363,8 @@ spark.sql("CREATE EXTERNAL TABLE IF NOT EXISTS `demo`.`amazonreview4`( `marketpl
 sql_scripts=spark.read.text(sys.argv[1]+"/app_code/job/set-of-hive-queries.sql").collect()
 cmd_str=' '.join([x[0] for x in sql_scripts]).split(';')
 for query in cmd_str:
-    if (query != ""):
-        spark.sql(query).show()
+  if (query != ""):
+      spark.sql(query).show()
 spark.stop()
 ```
 ## 4.2 Submit sidecar_hivethrift_eks.py job to EMR on EKS
