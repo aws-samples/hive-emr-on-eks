@@ -1,6 +1,6 @@
 ARG JAVA_IMAGE_TAG=17-jdk-noble
 ARG BUILD_ENV=templates
-ARG HMS_VERSION=3.0.0
+ARG HIVE_VERSION=4.0.0
 ARG HADOOP_VERSION=3.4.1
 ARG MYSQL_CONNECTOR_VERSION=9.1.0
 ARG LOG4J_VERIONS=2.24.1
@@ -46,10 +46,28 @@ RUN . /usr/local/bin/verlte && \
 RUN mvn dependency:copy-dependencies -DoutputDirectory=/build/dependencies
 
 
+FROM maven:3-eclipse-temurin-8-focal AS hms-builder
+ARG HIVE_VERSION
+
+WORKDIR /hive
+# Hive 4.0.0 need patch. Root cause: HIVE-28487, solved in Hive 4.0.1
+RUN wget https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-src.tar.gz && \
+    tar -xzf apache-hive-${HIVE_VERSION}-src.tar.gz && \
+    rm apache-hive-${HIVE_VERSION}-src.tar.gz && \
+    cd apache-hive-${HIVE_VERSION}-src/standalone-metastore && \
+    if [ "${HIVE_VERSION}" = "4.0.0" ]; then \
+        sed -i 's/CLASS=org.apache.hadoop.hive.metastore.tools.MetastoreSchemaTool/CLASS=org.apache.hadoop.hive.metastore.tools.schematool.MetastoreSchemaTool/' \
+            metastore-server/src/main/scripts/ext/schemaTool.sh; \
+    fi && \
+    mvn clean install -DskipTests -Pdist && \
+    mv metastore-server/target/apache-hive-standalone-metastore-server-${HIVE_VERSION}-bin.tar.gz \
+        /hive/hive-standalone-metastore-${HIVE_VERSION}-bin.tar.gz
+
+
 # Continue from the selected template stage
 FROM build_${BUILD_ENV} AS build
 
-ARG HMS_VERSION
+ARG HIVE_VERSION
 ARG HADOOP_VERSION
 ARG MYSQL_CONNECTOR_VERSION
 ARG LOG4J_VERIONS
@@ -100,10 +118,10 @@ RUN tar -xzf hadoop-${HADOOP_VERSION}*.tar.gz && \
 
 
 # Download and install Hive Metastore Standalone (HMS)
-RUN wget https://downloads.apache.org/hive/hive-standalone-metastore-${HMS_VERSION}/hive-standalone-metastore-${HMS_VERSION}-bin.tar.gz && \
-    tar -xzf hive-standalone-metastore-${HMS_VERSION}-bin.tar.gz && \
-    rm hive-standalone-metastore-${HMS_VERSION}-bin.tar.gz && \
-    mv apache-hive-metastore-${HMS_VERSION}-bin $METASTORE_HOME
+COPY --from=hms-builder /hive/hive-standalone-metastore-${HIVE_VERSION}-bin.tar.gz .
+RUN tar -xzf hive-standalone-metastore-${HIVE_VERSION}-bin.tar.gz && \
+    rm hive-standalone-metastore-${HIVE_VERSION}-bin.tar.gz && \
+    mv apache-hive-metastore-${HIVE_VERSION}-bin $METASTORE_HOME
 
 
 # Add additional jars to the Hadoop classpath
@@ -114,7 +132,8 @@ RUN wget -P $LIB_DIR https://repo1.maven.org/maven2/org/apache/logging/log4j/log
     wget -P $LIB_DIR https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/${LOG4J_VERIONS}/log4j-api-${LOG4J_VERIONS}.jar && \
     wget -P $LIB_DIR https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/${LOG4J_VERIONS}/log4j-core-${LOG4J_VERIONS}.jar && \
     wget -P $LIB_DIR https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-slf4j18-impl/2.18.0/log4j-slf4j18-impl-2.18.0.jar && \
-    wget -P $LIB_DIR https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/${MYSQL_CONNECTOR_VERSION}/mysql-connector-j-${MYSQL_CONNECTOR_VERSION}.jar -O $LIB_DIR/mysql-connector-java.jar
+    wget -P $LIB_DIR https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/${MYSQL_CONNECTOR_VERSION}/mysql-connector-j-${MYSQL_CONNECTOR_VERSION}.jar -O $LIB_DIR/mysql-connector-java.jar && \
+    wget -P $LIB_DIR https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-hdfs/${HADOOP_VERSION}/hadoop-hdfs-${HADOOP_VERSION}.jar -O $LIB_DIR/hadoop-hdfs-${HADOOP_VERSION}.jar
 
 
 RUN ln -s $LIB_DIR/mysql-connector-java* ${HADOOP_HOME}/share/hadoop/common/lib/ && \
