@@ -162,12 +162,12 @@ function run_schema_tool() {
 }
 
 function start_metastore() {
+  local metastore_cmd="/opt/hive-metastore/bin/start-metastore"
   local verbose_flag=""
   if [ "${VERBOSE}" = "true" ]; then
     verbose_flag="--verbose"
   fi
 
-  local hive_start_cmd="/opt/hive-metastore/bin/start-metastore ${verbose_flag}"
   local self_terminate_cmd="/opt/hive-metastore/bin/self-terminate.sh"
 
   if [ "${ENABLE_SELF_TERMINATE}" = "true" ]; then
@@ -184,11 +184,11 @@ function start_metastore() {
     export SELF_TERMINATE_INIT_TIMEOUT
     export SELF_TERMINATE_HEARTBEAT_TIMEOUT
 
-    "$hive_start_cmd" & "$self_terminate_cmd" & wait
+    "${metastore_cmd}" ${verbose_flag} & "${self_terminate_cmd}" & wait
   else
     log "INFO" "Starting Hive Metastore service (self-terminate disabled)"
     [ "${VERBOSE}" = "true" ] && log "INFO" "- Verbose logging: enabled"
-    "$hive_start_cmd" & wait
+    "${metastore_cmd}" ${verbose_flag} & wait
   fi
 }
 
