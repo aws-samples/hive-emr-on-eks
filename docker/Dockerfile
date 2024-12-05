@@ -1,6 +1,6 @@
 ARG JAVA_IMAGE_TAG=17-jdk-noble
 ARG BUILD_ENV=templates
-ARG HIVE_VERSION=4.0.0
+ARG HIVE_VERSION=3.1.3
 ARG HADOOP_VERSION=3.4.1
 ARG MYSQL_CONNECTOR_VERSION=9.1.0
 ARG LOG4J_VERIONS=2.24.1
@@ -50,18 +50,25 @@ FROM maven:3-eclipse-temurin-8-focal AS hms-builder
 ARG HIVE_VERSION
 
 WORKDIR /hive
-# Hive 4.0.0 need patch. Root cause: HIVE-28487, solved in Hive 4.0.1
-RUN wget https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-src.tar.gz && \
-    tar -xzf apache-hive-${HIVE_VERSION}-src.tar.gz && \
-    rm apache-hive-${HIVE_VERSION}-src.tar.gz && \
-    cd apache-hive-${HIVE_VERSION}-src/standalone-metastore && \
-    if [ "${HIVE_VERSION}" = "4.0.0" ]; then \
-        sed -i 's/CLASS=org.apache.hadoop.hive.metastore.tools.MetastoreSchemaTool/CLASS=org.apache.hadoop.hive.metastore.tools.schematool.MetastoreSchemaTool/' \
-            metastore-server/src/main/scripts/ext/schemaTool.sh; \
-    fi && \
-    mvn clean install -DskipTests -Pdist && \
-    mv metastore-server/target/apache-hive-standalone-metastore-server-${HIVE_VERSION}-bin.tar.gz \
-        /hive/hive-standalone-metastore-${HIVE_VERSION}-bin.tar.gz
+
+RUN if [ -n "${HIVE_VERSION%%3*}" ]; then \
+        echo "Building Hive ${HIVE_VERSION} from source" && \
+        wget https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-src.tar.gz && \
+        tar -xzf apache-hive-${HIVE_VERSION}-src.tar.gz && \
+        rm apache-hive-${HIVE_VERSION}-src.tar.gz && \
+        cd apache-hive-${HIVE_VERSION}-src/standalone-metastore && \
+        # Apply patch specifically for Hive 4.0.0 (HIVE-28487)
+        if [ "${HIVE_VERSION}" = "4.0.0" ]; then \
+            sed -i 's/CLASS=org.apache.hadoop.hive.metastore.tools.MetastoreSchemaTool/CLASS=org.apache.hadoop.hive.metastore.tools.schematool.MetastoreSchemaTool/' \
+                metastore-server/src/main/scripts/ext/schemaTool.sh; \
+        fi && \
+        mvn clean install -DskipTests -Pdist && \
+        mv metastore-server/target/apache-hive-standalone-metastore-server-${HIVE_VERSION}-bin.tar.gz \
+            /hive/hive-standalone-metastore-${HIVE_VERSION}-bin.tar.gz; \
+    else \
+        echo "Downloading Hive ${HIVE_VERSION} pre-built package" && \
+        wget https://repo1.maven.org/maven2/org/apache/hive/hive-standalone-metastore/${HIVE_VERSION}/hive-standalone-metastore-${HIVE_VERSION}-bin.tar.gz ; \
+    fi
 
 
 # Continue from the selected template stage

@@ -39,6 +39,11 @@ docker push $DOCKERHUB_USERNAME/hive-metastore:3.0.0
 ### Environment Variables
 When running the container in sidecar mode, the following environment variables are used to configure the Hive Metastore:
 
+#### Logging Configuration
+- `VERBOSE`: Enable verbose logging when set to "true" (default: false)
+  - When enabled, adds the `--verbose` flag to the metastore startup command
+  - Provides more detailed logging output for troubleshooting
+
 #### S3 Configuration (core-site.xml)
 - `HIVE_WAREHOUSE_S3LOCATION`: S3 bucket location for the warehouse (optional)
   - When set, configures the default filesystem to use S3
@@ -65,6 +70,9 @@ Required when `HIVE_DB_EXTERNAL=true`:
 
 Example environment configuration for sidecar mode:
 ```bash
+# Logging Configuration
+export VERBOSE=true
+
 # Basic Configuration
 export HIVE_WAREHOUSE_S3LOCATION=my-bucket/warehouse
 export HIVE_WAREHOUSE_DIR=/my-bucket/warehouse

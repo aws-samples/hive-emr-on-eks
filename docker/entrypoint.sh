@@ -1,10 +1,8 @@
 #!/bin/bash
 
-
 # Schema operation control variables
 ENABLE_SCHEMA_CHECK=${ENABLE_SCHEMA_CHECK:-false}
 AUTO_INIT_SCHEMA=${AUTO_INIT_SCHEMA:-false}
-
 
 # Self-terminate control variables
 ENABLE_SELF_TERMINATE=${ENABLE_SELF_TERMINATE:-false}
@@ -13,6 +11,8 @@ SELF_TERMINATE_INTERVAL=${SELF_TERMINATE_INTERVAL:-5}
 SELF_TERMINATE_INIT_TIMEOUT=${SELF_TERMINATE_INIT_TIMEOUT:-60}
 SELF_TERMINATE_HEARTBEAT_TIMEOUT=${SELF_TERMINATE_HEARTBEAT_TIMEOUT:-10}
 
+# Verbose flag control
+VERBOSE=${VERBOSE:-false}
 
 function show_help() {
     cat << EOF
@@ -55,6 +55,10 @@ Self-Terminate Control:
                              Maximum time between file updates in seconds
                              Default: $SELF_TERMINATE_HEARTBEAT_TIMEOUT
 
+Logging Control:
+    VERBOSE                 Enable verbose logging if true
+                            Default: $VERBOSE
+
 Options:
     --help                  Display this help message
 
@@ -65,9 +69,10 @@ Example:
     export SELF_TERMINATE_HEARTBEAT_TIMEOUT=30
     ./entrypoint.sh
 
-    # Disable self-terminate and enable auto schema init
+    # Disable self-terminate and enable auto schema init with verbose logging
     export ENABLE_SELF_TERMINATE=false
     export AUTO_INIT_SCHEMA=true
+    export VERBOSE=true
     ./entrypoint.sh
 EOF
     exit 0
@@ -157,7 +162,12 @@ function run_schema_tool() {
 }
 
 function start_metastore() {
-  local hive_start_cmd="/opt/hive-metastore/bin/start-metastore"
+  local verbose_flag=""
+  if [ "${VERBOSE}" = "true" ]; then
+    verbose_flag="--verbose"
+  fi
+
+  local hive_start_cmd="/opt/hive-metastore/bin/start-metastore ${verbose_flag}"
   local self_terminate_cmd="/opt/hive-metastore/bin/self-terminate.sh"
 
   if [ "${ENABLE_SELF_TERMINATE}" = "true" ]; then
@@ -166,6 +176,7 @@ function start_metastore() {
     log "INFO" "- Check interval: ${SELF_TERMINATE_INTERVAL} seconds"
     log "INFO" "- Initial timeout: ${SELF_TERMINATE_INIT_TIMEOUT} seconds"
     log "INFO" "- Heartbeat timeout: ${SELF_TERMINATE_HEARTBEAT_TIMEOUT} seconds"
+    [ "${VERBOSE}" = "true" ] && log "INFO" "- Verbose logging: enabled"
 
     # Export self-terminate variables
     export SELF_TERMINATE_FILE
@@ -176,9 +187,11 @@ function start_metastore() {
     "$hive_start_cmd" & "$self_terminate_cmd" & wait
   else
     log "INFO" "Starting Hive Metastore service (self-terminate disabled)"
+    [ "${VERBOSE}" = "true" ] && log "INFO" "- Verbose logging: enabled"
     "$hive_start_cmd" & wait
   fi
 }
+
 
 render_templates
 run_schema_tool
