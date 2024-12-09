@@ -30,7 +30,7 @@
 
   <property>
     <name>metastore.task.threads.always</name>
-    <value>org.apache.hadoop.hive.metastore.events.EventCleanerTask,org.apache.hadoop.hive.metastore.MaterializationsCacheCleanerTask</value>
+    <value>org.apache.hadoop.hive.metastore.events.EventCleanerTask</value>
   </property>
 
   <property>
