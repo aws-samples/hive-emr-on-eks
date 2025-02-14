@@ -38,6 +38,35 @@ Leveraging the k8s's [External Secrets Operator(ESO)](https://external-secrets.i
 Check out the [example values.yaml file](../source/app_resources/hive-metastore-values.yaml#L23) deployed by the solution's CFN/CDK templates, and a sidecar [pod template example](../deployment/app_code/job/sidecar_hms_pod_template.yaml#L48).
 
 
+### Network Load Balancer (NLB) Support
+The chart provides optional support for AWS Network Load Balancer to expose the Hive Metastore Service externally. This is particularly useful in scenarios where:
+- You need to access HMS from outside the EKS cluster
+- You have applications in different VPCs that need to connect to HMS
+- You want to implement cross-region access to HMS
+- You need stable, static IP addresses for HMS access
+
+For complete setup instructions, refer to the [official NLB setup guide](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.11/guide/service/nlb/).
+
+
+#### Prerequisites for AWS Network Load Balancer
+Before using the NLB functionality, ensure the AWS Load Balancer Controller is installed on your EKS cluster.
+
+#### Enabling NLB
+All supported annotations can be found in the [official AWS Load Balancer Controller documentation](https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/guide/service/annotations.md).
+
+To enable the NLB, modify your values.yaml file to include:
+```yaml
+service:
+  type: ClusterIP  # Default internal service type
+  annotations: {}   # Annotations for default service
+  nlb:
+    enabled: true  # Enable NLB service
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+      # Restrict access to specific CIDR ranges
+      service.beta.kubernetes.io/load-balancer-source-ranges: "10.0.0.0/8"
+```
+
 ## EKS resources used in this Helm chart
 The resources used in the this chart are defined in yaml files inside [`/templates` directory](./templates). The following resources are used:
 
@@ -45,3 +74,4 @@ The resources used in the this chart are defined in yaml files inside [`/templat
 - [Service](templates/service.yaml): exposes the HMS service as a ClusterIP type of service.
 - [Horizontal Pods Autoscaler (HPA)](templates/hpa.yaml):  To guarantee the HMS service availability, the HPA automatically increases or decreases the number of pods available in a ReplicaSet based on certain thresholds (memory and cpu).
 - [Deployment](templates/deployment.yaml): the main resource, because it specifies pod's configurations and is the link between all resources and the HMS pods.
+
