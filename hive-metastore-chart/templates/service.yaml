@@ -1,10 +1,14 @@
+# Service 1 - Default internal service
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "hive-metastore.name" . }}
   labels:
     {{- include "hive-metastore.labels" $ | trim | nindent 4 }}
-
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -14,3 +18,28 @@ spec:
       protocol: TCP
   selector:
     {{- include "hive-metastore.selectorLabels" . | nindent 4 }}
+
+---
+# Service 2 - LoadBalancer service
+{{- if .Values.service.nlb.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hive-metastore.name" . }}-nlb
+  labels:
+    {{- include "hive-metastore.labels" $ | trim | nindent 4 }}
+  {{- with .Values.service.nlb.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: LoadBalancer
+  loadBalancerClass: service.k8s.aws/nlb
+  ports:
+    - name: thrift
+      port: 9083
+      targetPort: 9083
+      protocol: TCP
+  selector:
+    {{- include "hive-metastore.selectorLabels" . | nindent 4 }}
+{{- end }}

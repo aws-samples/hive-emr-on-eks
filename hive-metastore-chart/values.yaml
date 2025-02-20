@@ -27,7 +27,13 @@ env:
   # HIVE_DB_USER: <SECRET_MANAGER_SECRET_KEY_FOR_USERNAME>
   # HIVE_DB_PASS: <SECRET_MANAGER_SECRET_KEY_FOR_PASSWORD>
 service:
-  type: ClusterIP 
+  type: ClusterIP
+  annotations: {}  # For the default service
+  nlb:
+    enabled: false
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+      service.beta.kubernetes.io/load-balancer-source-ranges: "10.0.0.0/8"  # Example CIDR
 resources:
   limits:
     cpu: 1
