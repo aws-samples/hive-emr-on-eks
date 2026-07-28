@@ -33,7 +33,7 @@ setuptools.setup(
     packages=setuptools.find_packages(where="source"),
 
     install_requires=[
-        "aws-cdk-lib==2.141.0",
+        "aws-cdk-lib==2.253.0",
         "constructs>=10.0.0,<11.0.0",
         "pyyaml==6.0.1",
         "aws-cdk.lambda-layer-kubectl-v28"
